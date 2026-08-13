@@ -20,6 +20,16 @@ export interface LedgerEntry {
   readonly previous: Fixed;
   readonly next: Fixed;
   readonly factors: readonly Factor[];
+  /**
+   * State keys this module read during the tick that produced this write.
+   *
+   * Deliberately conservative: it is the module's whole read set for the tick,
+   * not a per-expression trace, so a read used for one write is attributed to
+   * every write that module made in the same tick. The over-approximation is
+   * the safe direction — it can only cause the provenance gate to block
+   * something it might have allowed, never to allow something it should block.
+   */
+  readonly reads: readonly string[];
 }
 
 export class Ledger {

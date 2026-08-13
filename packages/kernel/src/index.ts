@@ -6,13 +6,13 @@
  * three are enforced by lint (eslint.config.mjs); the fourth by the Fixed type.
  */
 
-export const KERNEL_VERSION = '0.1.0';
+export const KERNEL_VERSION = '0.2.0';
 
 /**
  * Read by bin/determinism-check.ts. Bumping this past 1 while the determinism
  * check is still a stub fails the build on purpose.
  */
-export const PHASE = 1 as const;
+export const PHASE = 2 as const;
 
 export { Fx, FIXED_DECIMALS, FIXED_SCALE, type Fixed } from './fixed.js';
 export { Ledger, type Factor, type LedgerEntry, type Provenance } from './ledger/factor.js';

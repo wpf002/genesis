@@ -1,31 +1,38 @@
 /**
  * @genesis/params — parameter registry and provenance gate.
  *
- * Phase 0 defines only the provenance vocabulary, which is the one thing the
- * rest of the tree is allowed to depend on before Phase 2. The registry,
- * dependency tracking and GateCheck land in Phase 2.
+ * The registry is the only place a parameter can come into existence, and it
+ * refuses a declaration that does not say where the number came from.
  */
 
-/**
- * Provenance is a required field on every parameter. There is no default, and
- * there is no fourth tag. Mirrors the `Provenance` enum in the Prisma schema.
- */
-export const PROVENANCE = ['CALIBRATED', 'ESTIMATED', 'INVENTED'] as const;
+/** Bumped when the gate's capability changes. Read by bin/gate-check.ts. */
+export const PHASE = 2 as const;
 
-export type Provenance = (typeof PROVENANCE)[number];
+export {
+  isAdmissibleInRigor,
+  MODE,
+  PROVENANCE,
+  type Mode,
+  type Provenance,
+} from './provenance/tags.js';
 
-/** Run modes. Mirrors the `Mode` enum in the Prisma schema. */
-export const MODE = ['RIGOR', 'SANDBOX'] as const;
+export { ParamRegistry, paramDeclSchema, type ParamDecl } from './registry/registry.js';
+export { SANDBOX_PARAMS } from './registry/seed.js';
 
-export type Mode = (typeof MODE)[number];
+export {
+  buildDependencyGraph,
+  findParamPath,
+  type DependencyGraph,
+} from './provenance/graph.js';
 
-/**
- * The boundary, stated once: a Rigor run may not emit an output whose
- * dependency path touches an INVENTED parameter.
- */
-export function isAdmissibleInRigor(provenance: Provenance): boolean {
-  return provenance !== 'INVENTED';
-}
-
-/** Bumped when the registry and GateCheck land. Read by bin/gate-check.ts. */
-export const PHASE = 0 as const;
+export {
+  formatGateReport,
+  gateCheck,
+  strictnessFor,
+  type GateInput,
+  type GateReport,
+  type GateStatus,
+  type GateViolation,
+  type Strictness,
+  type ViolationReason,
+} from './provenance/gate.js';

@@ -11,7 +11,7 @@ import { PHASE } from '../index.js';
 import { Run, terminalHash, type RunOptions } from '../tick/loop.js';
 import { noopModule, REFERENCE_MODULES } from '../testing/reference-model.js';
 
-const REQUIRED_PHASE = 2;
+const REQUIRED_PHASE = 3;
 const REPLAYS = 1000;
 const TICKS = 200;
 const SNAPSHOT_TICK = 73;
@@ -19,7 +19,7 @@ const SEED = 20260806n;
 
 if (PHASE >= REQUIRED_PHASE) {
   console.error(
-    `determinism: kernel reports Phase ${PHASE}; this check covers Phase 1 only.`,
+    `determinism: kernel reports Phase ${PHASE}; this check covers Phases 1-2 only.`,
   );
   process.exit(1);
 }

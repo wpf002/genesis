@@ -13,8 +13,8 @@ const SCOPE = [
 
 const PHASES = [
   { n: 0, name: 'Repo and bootstrap', gate: 'Clean clone builds and tests green in CI.', done: true },
-  { n: 1, name: 'Deterministic kernel', gate: '1000 seeded replays byte-match.', done: false },
-  { n: 2, name: 'Parameter registry and provenance gate', gate: 'One INVENTED ancestor refuses the run.', done: false },
+  { n: 1, name: 'Deterministic kernel', gate: '1000 seeded replays byte-match.', done: true },
+  { n: 2, name: 'Parameter registry and provenance gate', gate: 'One INVENTED ancestor refuses the run.', done: true },
   { n: 3, name: 'Identifiability first', gate: 'At least one parameter found non-identifiable.', done: false },
   { n: 4, name: 'Calibration and validation', gate: 'The model card reports an honest failure.', done: false },
   { n: 5, name: 'Sandbox subsystems', gate: '5000 years, reproducible, no float in state.', done: false },

@@ -12,6 +12,7 @@
     "gate": "node dist/bin/gate-check.js"
   },
   "dependencies": {
+    "@genesis/kernel": "workspace:*",
     "zod": "^3.23.8"
   },
   "devDependencies": {

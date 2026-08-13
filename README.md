@@ -101,14 +101,19 @@ Both `determinism` and `gate` run in CI on every push. A red gate blocks merge.
 
 ## Status
 
-**Phase 1 complete.** The kernel is real: fixed-point arithmetic, xoshiro128\*\*
-with per-module substreams, the `Factor[]` ledger, canonical state encoding and a
-from-scratch BLAKE3 (verified against all 35 official test vectors).
+**Phase 2 complete.** Both verification commands now do real work.
 
-`pnpm determinism` now runs the Phase 1 exit gate for real — 1000 replays,
-snapshot/restore equivalence, and no-op module invariance. `pnpm gate` is still a
-declared no-op until the registry lands in Phase 2; it prints `NOT_IMPLEMENTED`
-and never prints `PASS`. See `docs/decisions/0001-phase-0-stubs.md`.
+`pnpm determinism` runs the Phase 1 gate: 1000 replays, snapshot/restore
+equivalence, no-op module invariance, and a different-seed control so a constant
+hash cannot pass. The kernel underneath it is fixed-point arithmetic,
+xoshiro128\*\* with per-module substreams, the `Factor[]` ledger, canonical state
+encoding, and a from-scratch BLAKE3 verified against all 35 official test vectors.
+
+`pnpm gate` runs the Phase 2 gate: an INVENTED parameter anywhere upstream of a
+Rigor output blocks the run and the report names the full path. It also asserts
+the gate cannot be relaxed by config under `NODE_ENV=production`, that an
+unregistered parameter is refused, and that a clean run still passes — a gate
+that blocked everything would otherwise look identical to one that works.
 
 Design notes: `docs/interface-bar.md` for the Phase 6 target, `docs/decisions/`
 for ADRs.

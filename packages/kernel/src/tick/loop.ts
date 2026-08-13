@@ -64,10 +64,16 @@ export class Run {
   private contextFor(module: SimModule): TickContext {
     const rng = this.streams.get(module.id);
     if (rng === undefined) throw new Error(`run: no stream for ${module.id}`);
+    // One read set per module per tick. Insertion-ordered, so it is stable.
+    const reads = new Set<string>();
     return {
       tick: this.currentTick,
       rng,
-      get: (key: string): Fixed => this.store.get(key),
+      get: (key: string): Fixed => {
+        const value = this.store.get(key);
+        reads.add(key);
+        return value;
+      },
       set: (localKey: string, value: Fixed, factors: readonly Factor[]): void => {
         const qualified = `${module.id}.${localKey}`;
         const owner = this.store.ownerOf(qualified);
@@ -83,6 +89,7 @@ export class Run {
           previous,
           next: value,
           factors,
+          reads: [...reads],
         });
       },
     };
