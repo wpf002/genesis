@@ -5,7 +5,7 @@
 // invented one, because nobody has even claimed where it came from.
 //
 // The gate has no production bypass (locked invariant #4). GENESIS_PROVENANCE_STRICT
-// is honoured for local exploration only; under NODE_ENV=production it is ignored
+// is honored for local exploration only; under NODE_ENV=production it is ignored
 // entirely and the run is blocked.
 
 import { ParamRegistry } from '../registry/registry.js';

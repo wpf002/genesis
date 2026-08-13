@@ -3,9 +3,9 @@ import { ModeBadge } from '@/components/ModeBadge';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Genesis — civilization simulation with an enforced provenance boundary',
+  title: 'Genesis',
   description:
-    'Rigor mode reports posteriors, not stories. Sandbox mode makes no scientific claim. The same kernel drives both and the boundary is enforced in code.',
+    'A civilization simulation engine with two operating modes and one enforced boundary between them.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

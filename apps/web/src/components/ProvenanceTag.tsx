@@ -1,10 +1,12 @@
-// The three provenance colours are reserved and never reused as chart series.
-// Colour is never the only channel: every tag ships with a distinct glyph and
-// the word, so it survives CVD, greyscale and forced-colors.
+// The three provenance colors are reserved and never reused as chart series.
+// Color is never the only channel: every tag ships with a distinct glyph and
+// the word, so it survives CVD, grayscale and forced-colors.
 //
 // Palette chosen by running the validator, not by eye. Green/amber/red fails
 // deuteranopia separation (ΔE 4.1); blue/yellow/magenta passes all-pairs.
 // See docs/interface-bar.md.
+//
+// Card text is README.md's table, verbatim. Do not reword it here.
 
 export type Provenance = 'CALIBRATED' | 'ESTIMATED' | 'INVENTED';
 
@@ -15,20 +17,20 @@ const SPEC: Record<
   CALIBRATED: {
     glyph: '◆',
     color: 'var(--prov-calibrated)',
-    gloss: 'Fit to historical data via the calibration service.',
+    gloss: 'Fit to historical data via the calibration service',
     ships: 'Posterior interval, dataset reference',
   },
   ESTIMATED: {
     glyph: '◐',
     color: 'var(--prov-estimated)',
-    gloss: 'Taken from published literature.',
+    gloss: 'Taken from published literature',
     ships: 'Citation',
   },
   INVENTED: {
     glyph: '▲',
     color: 'var(--prov-invented)',
-    gloss: 'Chosen because it produces good behaviour.',
-    ships: 'Nothing. It is a guess and is labelled as one.',
+    gloss: 'Chosen because it produces good behavior',
+    ships: 'Nothing. It is a guess and is labeled as one.',
   },
 };
 

@@ -6,7 +6,7 @@
  * Genesis design tokens. Dark-only by decision; every surface is painted
  * explicitly rather than inherited.
  *
- * Provenance colours are reserved and never reused as a chart series. Chosen by
+ * Provenance colors are reserved and never reused as a chart series. Chosen by
  * running the palette validator: green/amber/red fails deuteranopia separation
  * (ΔE 4.1), blue/yellow/magenta passes all-pairs on this surface (worst CVD
  * ΔE 13.2, normal-vision 19.3, all >= 3:1 contrast). See docs/interface-bar.md.

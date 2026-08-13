@@ -1,4 +1,4 @@
-// The Sandbox constants, all INVENTED, all labelled as such.
+// The Sandbox constants, all INVENTED, all labeled as such.
 //
 // These exist in Phase 2 so the gate has something real to block. Every note is
 // the honest reason the number was picked, which is almost always "it makes the
@@ -51,7 +51,7 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   // --- politics ----------------------------------------------------------
   { key: 'politics.legitimacy.decay', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Legitimacy erodes on a scale that makes dynasties turn over.' },
   { key: 'politics.elite.overproduction_threshold', unit: 'ratio', provenance: 'INVENTED', note: 'Borrowed shape from cliodynamics, but the number itself is a guess.' },
-  { key: 'politics.state.fragmentation_pressure', unit: 'dimensionless', provenance: 'INVENTED', note: 'Chosen so large empires are unstable, which is the behaviour I wanted.' },
+  { key: 'politics.state.fragmentation_pressure', unit: 'dimensionless', provenance: 'INVENTED', note: 'Chosen so large empires are unstable, which is the behavior I wanted.' },
 
   // --- culture -----------------------------------------------------------
   { key: 'culture.replicator.selection_strength', unit: 'dimensionless', provenance: 'INVENTED', note: 'Replicator dynamics selection term set for visible but not instant sect turnover.' },
