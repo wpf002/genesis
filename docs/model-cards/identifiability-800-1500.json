@@ -1,0 +1,44 @@
+{
+  "dataset": "HYDE 3.5 (popc base/lower/upper) + PAGES2k asia2k & EuroMed2k",
+  "generated": "2026-08-13",
+  "mode": "REAL",
+  "model": "population-yield-climate, century steps, 800-1500 CE",
+  "verdicts": [
+    {
+      "bounded_above": true,
+      "bounded_below": true,
+      "max_delta": 16.37493407783463,
+      "name": "growth_rate",
+      "reason": "profile likelihood is bounded on both sides",
+      "total_order": 0.4669436698046842,
+      "verdict": "IDENTIFIABLE"
+    },
+    {
+      "bounded_above": false,
+      "bounded_below": false,
+      "max_delta": 0.6117427257647909,
+      "name": "climate_sensitivity",
+      "reason": "profile likelihood never exceeds the threshold (max delta 0.612 < 3.841): the data cannot constrain this parameter",
+      "total_order": 0.3453007217409,
+      "verdict": "NON_IDENTIFIED"
+    },
+    {
+      "bounded_above": false,
+      "bounded_below": false,
+      "max_delta": 3.5588293561414206,
+      "name": "k_yellow_river",
+      "reason": "profile likelihood never exceeds the threshold (max delta 3.559 < 3.841): the data cannot constrain this parameter",
+      "total_order": 0.22389010699146517,
+      "verdict": "NON_IDENTIFIED"
+    },
+    {
+      "bounded_above": false,
+      "bounded_below": false,
+      "max_delta": 1.4886937262837892,
+      "name": "k_euromed",
+      "reason": "profile likelihood never exceeds the threshold (max delta 1.489 < 3.841): the data cannot constrain this parameter",
+      "total_order": 0.1452053272166743,
+      "verdict": "NON_IDENTIFIED"
+    }
+  ]
+}

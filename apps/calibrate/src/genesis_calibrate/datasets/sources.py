@@ -91,8 +91,18 @@ def all_manifests() -> list[DatasetManifest]:
             "asia2k-jja-temp-anom.txt",
             "jja_temperature_anomaly",
             "degC",
-            "PAGES2k Asia summer temperature anomaly reconstruction",
-            "Published as an ensemble of reconstructions; spread is the ensemble range.",
+            "PAGES2k Asia summer temperature anomaly reconstruction, 800-2009 CE",
+            (
+                "773-member ensemble with -99.999 for missing. Members start in "
+                "different years: 378 of 773 present at 800 CE, 682 by 1500."
+            ),
+        ),
+        _pages2k(
+            "eujja_2krecon_nested_cps.txt",
+            "jja_temperature_anomaly",
+            "degC",
+            "PAGES2k Euro-Med summer temperature reconstruction (Luterbacher 2016), 138 BCE-2003 CE",
+            "Ships its own 2-sigma bounds as Lower2sigma / Upper2sigma columns.",
         ),
     ]
 

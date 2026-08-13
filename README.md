@@ -121,13 +121,20 @@ the gate cannot be relaxed by config under `NODE_ENV=production`, that an
 unregistered parameter is refused, and that a clean run still passes — a gate
 that blocked everything would otherwise look identical to one that works.
 
-**Phase 3 is machinery only, and its gate is still open.** The ingest, Sobol and
-profile-likelihood harnesses exist and are tested against cases with known
-answers: Ishigami's analytic Sobol indices, and a model whose parameters are
-non-identifiable by construction. The pipeline runs end to end on synthetic data
-only. No identifiability report has been written and none may be — `write_report`
-refuses to put a `DRY_RUN` report in `docs/model-cards/`. Phase 3 closes when
-real HYDE and paleoclimate series are ingested and the analysis is run on them.
+**Phase 3 is complete, and the news is bad.** The analysis ran on HYDE 3.5 and
+PAGES2k. Of four free parameters, one is identifiable and three are not — and the
+one that matters most, the climate coupling, is the least identifiable of all
+under every reading of the observation uncertainty we tested.
+
+Read `docs/model-cards/identifiability-800-1500.md` before building anything on
+the Rigor track. Short version: 16 observations, because HYDE reports population
+at century resolution; the Nile is out because PAGES2k has no proxy within
+~1500 km of it; and HYDE's uncertainty envelope turns out to be a single global
+multiplier carrying no region-specific information at all.
+
+This is the outcome the roadmap warned about, arriving before any fitting was
+paid for. Genesis now has three layers rather than two — see
+`docs/decisions/0004-three-layers.md`.
 
 Design notes: `docs/interface-bar.md` for the Phase 6 target, `docs/decisions/`
 for ADRs.
