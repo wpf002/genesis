@@ -101,9 +101,17 @@ Both `determinism` and `gate` run in CI on every push. A red gate blocks merge.
 
 ## Status
 
-Phase 0 complete — infrastructure only. `determinism` and `gate` are declared no-ops
-until Phases 1 and 2 land; both print `NOT_IMPLEMENTED` and are tracked in
-`docs/decisions/0001-phase-0-stubs.md`.
+**Phase 1 complete.** The kernel is real: fixed-point arithmetic, xoshiro128\*\*
+with per-module substreams, the `Factor[]` ledger, canonical state encoding and a
+from-scratch BLAKE3 (verified against all 35 official test vectors).
+
+`pnpm determinism` now runs the Phase 1 exit gate for real — 1000 replays,
+snapshot/restore equivalence, and no-op module invariance. `pnpm gate` is still a
+declared no-op until the registry lands in Phase 2; it prints `NOT_IMPLEMENTED`
+and never prints `PASS`. See `docs/decisions/0001-phase-0-stubs.md`.
+
+Design notes: `docs/interface-bar.md` for the Phase 6 target, `docs/decisions/`
+for ADRs.
 
 See `ROADMAP.md`.
 

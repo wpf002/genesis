@@ -18,8 +18,9 @@
 #      no-ops with phase tripwires — see docs/decisions/0001-phase-0-stubs.md.
 #   4. packages/schema build wraps `prisma generate` with a placeholder
 #      DATABASE_URL so a clean clone builds with no .env present.
-#   5. apps/api tsconfig overrides module to CommonJS, since the package is
-#      deliberately not "type": "module" — see docs/decisions/0002-api-module-format.md.
+#   5. apps/api is now ESM. The "do NOT add type: module" note below was honoured
+#      through Phase 0 and overturned in Phase 1 when the app began importing the
+#      kernel — see docs/decisions/0003-api-is-esm.md.
 #   6. apps/web gained the minimum Next.js App Router files (layout, page,
 #      globals.css, next.config.mjs, postcss, tailwind config) so `next build` runs.
 #   7. `next lint` replaced with `eslint src` against a root ESLint 9 flat config
