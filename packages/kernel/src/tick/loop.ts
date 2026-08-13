@@ -4,7 +4,7 @@
 // (locked invariant #7). Each module gets its own RNG substream keyed by its id,
 // so order affects when a module runs but not which numbers it draws.
 
-import { Fx, type Fixed } from '../fixed.js';
+import type { Fixed } from '../fixed.js';
 import { Ledger, type Factor } from '../ledger/factor.js';
 import { createRng, deriveStream, type Rng, type RngState } from '../rng/xoshiro.js';
 import { blake3Hex } from '../state/blake3.js';
