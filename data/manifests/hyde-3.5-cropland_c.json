@@ -1,0 +1,23 @@
+{
+  "file": "hyde35/cropland_c.txt",
+  "is_reconstruction": true,
+  "license": "CC BY-NC 4.0 (License.txt) / CC BY 3.0 (readme_HYDE_3.5.txt) \u2014 sources disagree",
+  "name": "hyde-3.5-cropland_c",
+  "notes": null,
+  "retrieved": "2026-08-13",
+  "sha256": "d3ddee4c611af206f5324243c6676c2c9648306970e8c7e108d3cf5d418099bb",
+  "source_url": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/",
+  "variables": [
+    {
+      "description": "Cropland area per country",
+      "name": "cropland",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "HYDE ships base, lower and upper scenarios. The spread is a scenario envelope, not a credible interval, and has no stated coverage.",
+        "value": null
+      },
+      "unit": "km2"
+    }
+  ],
+  "version": "3.5 (gbc2025_7apr)"
+}

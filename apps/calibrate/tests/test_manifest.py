@@ -82,3 +82,14 @@ def test_manifest_round_trips(tmp_path: Path) -> None:
     path = tmp_path / "manifest.json"
     write_manifest(manifest, path)
     assert load_manifest(path) == manifest
+
+
+def test_ensemble_uncertainty_requires_a_note_not_a_fake_coverage() -> None:
+    from genesis_calibrate.datasets.manifest import Uncertainty
+
+    with pytest.raises(ValidationError):
+        Uncertainty(kind="ensemble")
+    assert Uncertainty(kind="ensemble", note="base/lower/upper scenarios").value is None
+
+    with pytest.raises(ValidationError):
+        Uncertainty(kind="relative")

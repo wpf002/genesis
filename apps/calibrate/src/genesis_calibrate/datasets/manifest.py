@@ -21,10 +21,22 @@ UncertaintyKind = Literal["absolute", "relative", "interval", "ensemble"]
 
 class Uncertainty(BaseModel):
     kind: UncertaintyKind
-    #: Interpretation depends on kind: absolute -> same unit as the variable,
-    #: relative -> fraction, interval/ensemble -> nominal coverage (e.g. 0.95).
-    value: float
+    #: absolute -> same unit as the variable, relative -> fraction,
+    #: interval -> nominal coverage (e.g. 0.95). Omitted for `ensemble`, where a
+    #: scenario envelope has no coverage; say so in the note instead of
+    #: inventing a number.
+    value: float | None = None
     note: str | None = None
+
+    @model_validator(mode="after")
+    def value_or_note(self) -> Uncertainty:
+        if self.kind == "ensemble":
+            if self.note is None:
+                raise ValueError("ensemble uncertainty must explain the envelope in a note")
+            return self
+        if self.value is None:
+            raise ValueError(f"{self.kind} uncertainty requires a value")
+        return self
 
 
 class Variable(BaseModel):

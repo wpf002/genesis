@@ -1,0 +1,23 @@
+{
+  "file": "pages2k/asia2k-jja-temp-anom.txt",
+  "is_reconstruction": true,
+  "license": "NOAA/WDS Paleoclimatology \u2014 public domain, cite the study",
+  "name": "pages2k-asia2k-jja-temp-anom",
+  "notes": null,
+  "retrieved": "2026-08-13",
+  "sha256": "646b1069891616b3d587b526dc8ec94831f26a0ec5f896072a7161a87d26feaa",
+  "source_url": "https://www.ncei.noaa.gov/pub/data/paleo/pages2k/",
+  "variables": [
+    {
+      "description": "PAGES2k Asia summer temperature anomaly reconstruction",
+      "name": "jja_temperature_anomaly",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "Published as an ensemble of reconstructions; spread is the ensemble range.",
+        "value": null
+      },
+      "unit": "degC"
+    }
+  ],
+  "version": "v2.0.0 (2017)"
+}

@@ -1,0 +1,23 @@
+{
+  "file": "hyde35/rf_rice_c.txt",
+  "is_reconstruction": true,
+  "license": "CC BY-NC 4.0 (License.txt) / CC BY 3.0 (readme_HYDE_3.5.txt) \u2014 sources disagree",
+  "name": "hyde-3.5-rf_rice_c",
+  "notes": null,
+  "retrieved": "2026-08-13",
+  "sha256": "67c6198b5bdc7a6272afe0636484b1acf33b75485a5384bfa1e302d40740ec06",
+  "source_url": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/",
+  "variables": [
+    {
+      "description": "Rain-fed rice area per country",
+      "name": "rainfed_rice",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "HYDE ships base, lower and upper scenarios. The spread is a scenario envelope, not a credible interval, and has no stated coverage.",
+        "value": null
+      },
+      "unit": "km2"
+    }
+  ],
+  "version": "3.5 (gbc2025_7apr)"
+}

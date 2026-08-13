@@ -1,0 +1,23 @@
+{
+  "file": "hyde35/popc_c_upper.txt",
+  "is_reconstruction": true,
+  "license": "CC BY-NC 4.0 (License.txt) / CC BY 3.0 (readme_HYDE_3.5.txt) \u2014 sources disagree",
+  "name": "hyde-3.5-popc_c_upper",
+  "notes": null,
+  "retrieved": "2026-08-13",
+  "sha256": "03d040d14b5e94d9cc5f61dcaea8c4d03b83be56dc004d733bb31ac49e2a3dbf",
+  "source_url": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/",
+  "variables": [
+    {
+      "description": "Population count per country, upper scenario",
+      "name": "population",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "HYDE ships base, lower and upper scenarios. The spread is a scenario envelope, not a credible interval, and has no stated coverage.",
+        "value": null
+      },
+      "unit": "people"
+    }
+  ],
+  "version": "3.5 (gbc2025_7apr)"
+}

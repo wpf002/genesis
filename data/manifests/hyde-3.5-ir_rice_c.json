@@ -1,0 +1,23 @@
+{
+  "file": "hyde35/ir_rice_c.txt",
+  "is_reconstruction": true,
+  "license": "CC BY-NC 4.0 (License.txt) / CC BY 3.0 (readme_HYDE_3.5.txt) \u2014 sources disagree",
+  "name": "hyde-3.5-ir_rice_c",
+  "notes": null,
+  "retrieved": "2026-08-13",
+  "sha256": "4544b126ca8fe97d12514f2e8d5c8eedf8902b22c7e16a4bff0bac6d48cac3d1",
+  "source_url": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/",
+  "variables": [
+    {
+      "description": "Irrigated rice area per country",
+      "name": "irrigated_rice",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "HYDE ships base, lower and upper scenarios. The spread is a scenario envelope, not a credible interval, and has no stated coverage.",
+        "value": null
+      },
+      "unit": "km2"
+    }
+  ],
+  "version": "3.5 (gbc2025_7apr)"
+}
