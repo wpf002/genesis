@@ -1,3 +1,95 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Genesis design tokens. Dark-only by decision; every surface is painted
+ * explicitly rather than inherited.
+ *
+ * Provenance colours are reserved and never reused as a chart series. Chosen by
+ * running the palette validator: green/amber/red fails deuteranopia separation
+ * (ΔE 4.1), blue/yellow/magenta passes all-pairs on this surface (worst CVD
+ * ΔE 13.2, normal-vision 19.3, all >= 3:1 contrast). See docs/interface-bar.md.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --plane: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-raised: #222220;
+
+  /* Ink */
+  --ink: #ffffff;
+  --ink-secondary: #c3c2b7;
+  --ink-muted: #898781;
+
+  /* Structure */
+  --grid: #2c2c2a;
+  --rule: #383835;
+  --hairline: rgba(255, 255, 255, 0.1);
+
+  /* Provenance — reserved, never decorative */
+  --prov-calibrated: #3987e5;
+  --prov-estimated: #c98500;
+  --prov-invented: #d55181;
+
+  /* Categorical series, for Phase 6 charts. Fixed order, never cycled. */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--plane);
+    color: var(--ink-secondary);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--prov-calibrated);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--prov-calibrated);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* The graticule under the hero. Pure CSS so the particle canvas can clear
+     itself every frame without erasing it. */
+  .graticule {
+    background-image:
+      repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 88px),
+      repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px 88px);
+    mask-image: radial-gradient(ellipse 90% 80% at 62% 45%, #000 10%, transparent 85%);
+  }
+
+  /* Small-caps machine label. Used for anything the system asserts about itself. */
+  .label {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .rule {
+    border-color: var(--rule);
+  }
+}
