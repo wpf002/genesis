@@ -1,0 +1,16 @@
+{
+  "name": "@genesis/schema",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run prisma:generate && tsc -p tsconfig.json",
+    "prisma:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://placeholder} prisma generate",
+    "typecheck": "pnpm run prisma:generate && tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": { "@prisma/client": "^5.20.0" },
+  "devDependencies": { "prisma": "^5.20.0", "typescript": "^5.6.3", "vitest": "^2.1.3" }
+}

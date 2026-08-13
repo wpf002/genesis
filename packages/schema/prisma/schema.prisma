@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Mode {
+  RIGOR
+  SANDBOX
+}
+
+enum Provenance {
+  CALIBRATED
+  ESTIMATED
+  INVENTED
+}
+
+/// A single reproducible simulation run. seed + configHash fully determines output.
+model Run {
+  id           String    @id @default(cuid())
+  mode         Mode
+  seed         BigInt
+  configHash   String
+  paramSetId   String
+  startTick    Int
+  endTick      Int
+  stateHash    String?   // hash of terminal state; verifies replay
+  gateStatus   String    @default("PENDING") // PASS | BLOCKED | BYPASSED
+  gateReport   Json?
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  paramSet     ParamSet  @relation(fields: [paramSetId], references: [id])
+  snapshots    Snapshot[]
+  events       Event[]
+  branches     Branch[]  @relation("ParentRun")
+
+  @@index([mode, createdAt])
+  @@unique([seed, configHash, paramSetId])
+}
+
+/// A named, versioned collection of parameter values.
+model ParamSet {
+  id          String       @id @default(cuid())
+  name        String
+  version     Int          @default(1)
+  description String?
+  createdAt   DateTime     @default(now())
+
+  values      ParamValue[]
+  runs        Run[]
+
+  @@unique([name, version])
+}
+
+/// One parameter. Provenance is not optional — this is the core invariant.
+model ParamValue {
+  id            String     @id @default(cuid())
+  paramSetId    String
+  key           String     // e.g. "agriculture.yield.tfp_exponent"
+  value         Decimal    @db.Decimal(24, 12)
+  provenance    Provenance
+  source        String?    // citation for ESTIMATED; dataset ref for CALIBRATED
+  posteriorLow  Decimal?   @db.Decimal(24, 12)
+  posteriorHigh Decimal?   @db.Decimal(24, 12)
+  unit          String?
+
+  paramSet      ParamSet   @relation(fields: [paramSetId], references: [id], onDelete: Cascade)
+
+  @@unique([paramSetId, key])
+  @@index([provenance])
+}
+
+/// Periodic full state capture for scrubbing and branching.
+model Snapshot {
+  id        String   @id @default(cuid())
+  runId     String
+  tick      Int
+  stateHash String
+  payload   Bytes
+  createdAt DateTime @default(now())
+
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, tick])
+}
+
+/// Every state delta, with the factors that produced it. The Fray pattern.
+model Event {
+  id        String   @id @default(cuid())
+  runId     String
+  tick      Int
+  kind      String
+  regionId  String?
+  delta     Json
+  factors   Json     // Factor[]: { key, provenance, contribution }
+  createdAt DateTime @default(now())
+
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, tick])
+  @@index([runId, kind])
+}
+
+/// Counterfactual fork from a parent run at a given tick.
+model Branch {
+  id            String   @id @default(cuid())
+  parentRunId   String
+  branchRunId   String   @unique
+  forkTick      Int
+  intervention  Json
+  label         String
+  createdAt     DateTime @default(now())
+
+  parentRun     Run      @relation("ParentRun", fields: [parentRunId], references: [id], onDelete: Cascade)
+
+  @@index([parentRunId])
+}
+
+/// Result of a validation test against historical data.
+model ValidationResult {
+  id           String   @id @default(cuid())
+  testId       String   // e.g. "V-01-malthusian"
+  paramSetId   String
+  passed       Boolean
+  metric       String
+  observed     Decimal  @db.Decimal(24, 12)
+  expected     Decimal  @db.Decimal(24, 12)
+  tolerance    Decimal  @db.Decimal(24, 12)
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@index([paramSetId, passed])
+}

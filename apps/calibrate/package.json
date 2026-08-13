@@ -1,0 +1,12 @@
+{
+  "name": "@genesis/calibrate",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "uv run uvicorn genesis_calibrate.main:app --reload --port 8300",
+    "build": "echo 'python service — no build step'",
+    "py:test": "uv run pytest",
+    "py:typecheck": "uv run mypy src",
+    "py:lint": "uv run ruff check src"
+  }
+}

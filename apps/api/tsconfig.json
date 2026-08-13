@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    // apps/api is CommonJS on purpose — it has no "type": "module".
+    // See docs/decisions/0002-api-module-format.md before changing this.
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "types": ["node"]
+  },
+  "include": ["src/**/*"]
+}
