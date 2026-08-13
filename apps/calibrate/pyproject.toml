@@ -27,5 +27,10 @@ build-backend = "hatchling.build"
 line-length = 90
 target-version = "py311"
 
+[[tool.mypy.overrides]]
+# Neither ships type information.
+module = ["SALib.*", "scipy.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

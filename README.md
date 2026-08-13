@@ -77,6 +77,12 @@ uv sync --extra dev
 uv run uvicorn genesis_calibrate.main:app --reload --port 8300
 ```
 
+Identifiability pipeline on synthetic data:
+
+```bash
+uv run python -m genesis_calibrate.cli dry-run --generated 2026-08-13
+```
+
 ## Verification commands
 
 ```bash
@@ -114,6 +120,14 @@ Rigor output blocks the run and the report names the full path. It also asserts
 the gate cannot be relaxed by config under `NODE_ENV=production`, that an
 unregistered parameter is refused, and that a clean run still passes — a gate
 that blocked everything would otherwise look identical to one that works.
+
+**Phase 3 is machinery only, and its gate is still open.** The ingest, Sobol and
+profile-likelihood harnesses exist and are tested against cases with known
+answers: Ishigami's analytic Sobol indices, and a model whose parameters are
+non-identifiable by construction. The pipeline runs end to end on synthetic data
+only. No identifiability report has been written and none may be — `write_report`
+refuses to put a `DRY_RUN` report in `docs/model-cards/`. Phase 3 closes when
+real HYDE and paleoclimate series are ingested and the analysis is run on them.
 
 Design notes: `docs/interface-bar.md` for the Phase 6 target, `docs/decisions/`
 for ADRs.
