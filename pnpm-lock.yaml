@@ -170,6 +170,9 @@ importers:
       '@genesis/kernel':
         specifier: workspace:*
         version: link:../kernel
+      '@genesis/models':
+        specifier: workspace:*
+        version: link:../models
       '@genesis/params':
         specifier: workspace:*
         version: link:../params
