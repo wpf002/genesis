@@ -9,6 +9,7 @@
 import { PHASE } from '../index.js';
 import { formatGateReport, gateCheck } from '../provenance/gate.js';
 import { paramDeclSchema } from '../registry/registry.js';
+import { assertRigorRunnable, RIGOR_PARAMS, RigorUnavailable } from '../registry/rigor.js';
 import { SANDBOX_PARAMS } from '../registry/seed.js';
 import {
   cleanFixture,
@@ -124,6 +125,20 @@ for (const suite of RIGOR_SUITES) {
     failures.push(
       `gate: SANDBOX produced status=${report.status} watermark=${report.watermarkRequired}`,
     );
+  }
+}
+
+// 7 — Rigor mode is empty and says so (ADR 0005).
+{
+  if (RIGOR_PARAMS.length !== 0) {
+    failures.push('gate: RIGOR_PARAMS is non-empty but ADR 0005 says Rigor ships empty');
+  }
+  try {
+    assertRigorRunnable();
+    failures.push('gate: a Rigor run was allowed to start with no calibrated parameters');
+  } catch (error) {
+    if (!(error instanceof RigorUnavailable)) throw error;
+    notes.push('rigor: 0 calibrated parameters, runs refused (ADR 0005)');
   }
 }
 

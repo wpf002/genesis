@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ParamRegistry } from './registry/registry.js';
+import { assertRigorRunnable, RIGOR_PARAMS, RigorUnavailable } from './registry/rigor.js';
 import { SANDBOX_PARAMS } from './registry/seed.js';
 import { gateCheck, strictnessFor } from './provenance/gate.js';
 import { isAdmissibleInRigor, PROVENANCE } from './provenance/tags.js';
@@ -152,5 +153,30 @@ describe('gate', () => {
       productionLocked: false,
     });
     expect(strictnessFor({})).toEqual({ strict: true, productionLocked: false });
+  });
+});
+
+
+describe('rigor mode is empty, and enforced (ADR 0005)', () => {
+  it('registers no calibrated parameters', () => {
+    expect(RIGOR_PARAMS).toEqual([]);
+  });
+
+  it('refuses to start a Rigor run', () => {
+    expect(() => assertRigorRunnable()).toThrow(RigorUnavailable);
+    expect(() => assertRigorRunnable()).toThrow(/no calibrated parameters/);
+  });
+
+  it('refuses a set containing anything not CALIBRATED', () => {
+    expect(() =>
+      assertRigorRunnable([
+        { key: 'a.b', unit: 'x', provenance: 'INVENTED', note: 'guess' },
+      ]),
+    ).toThrow(/not CALIBRATED/);
+  });
+
+  it('has no CALIBRATED parameter anywhere in the sandbox set', () => {
+    // Promoting one has to mean editing this assertion on purpose.
+    expect(SANDBOX_PARAMS.filter((d) => d.provenance === 'CALIBRATED')).toEqual([]);
   });
 });

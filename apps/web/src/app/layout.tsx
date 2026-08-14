@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="font-mono text-sm font-medium tracking-[0.24em] text-ink">
                 GENESIS
               </span>
-              <span className="label hidden sm:inline">Phase 2 · provenance gate</span>
+              <span className="label hidden sm:inline">Phase 5 · 18 subsystems</span>
             </div>
             {/* Permanent. Never conditionally rendered away. */}
             <ModeBadge mode={null} />

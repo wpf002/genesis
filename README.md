@@ -107,37 +107,41 @@ Both `determinism` and `gate` run in CI on every push. A red gate blocks merge.
 
 ## Status
 
-**Phase 2 complete.** Both verification commands now do real work.
+Phases 0 through 5 complete. CI green.
 
-`pnpm determinism` runs the Phase 1 gate: 1000 replays, snapshot/restore
-equivalence, no-op module invariance, and a different-seed control so a constant
-hash cannot pass. The kernel underneath it is fixed-point arithmetic,
-xoshiro128\*\* with per-module substreams, the `Factor[]` ledger, canonical state
-encoding, and a from-scratch BLAKE3 verified against all 35 official test vectors.
+**Rigor mode ships empty.** Phases 3 and 4 tested the two parameters the track
+was built around and both failed. `climate_sensitivity` clears the identifiability
+threshold at 408 observations while its fitted value ranges from −10.2 to +0.07
+and flips sign depending on whether a trend is removed — it absorbs trend rather
+than measuring climate. `growth_rate` calibrates cleanly across 110 countries,
+passes all seven pre-registered validation tests, and loses to freezing every
+country's population at its year-1000 value by 56%.
 
-`pnpm gate` runs the Phase 2 gate: an INVENTED parameter anywhere upstream of a
-Rigor output blocks the run and the report names the full path. It also asserts
-the gate cannot be relaxed by config under `NODE_ENV=production`, that an
-unregistered parameter is refused, and that a clean run still passes — a gate
-that blocked everything would otherwise look identical to one that works.
+So `RIGOR_PARAMS` is an empty set, nothing carries `CALIBRATED`, and
+`assertRigorRunnable` refuses to start a Rigor run rather than returning an empty
+one. Enforced by tests and by `pnpm gate`. See
+`docs/decisions/0005-rigor-ships-empty.md`.
 
-**Phase 3 is complete, and the news is bad.** The analysis ran on HYDE 3.5 and
-PAGES2k. Of four free parameters, one is identifiable and three are not — and the
-one that matters most, the climate coupling, is the least identifiable of all
-under every reading of the observation uncertainty we tested.
+Genesis today is a Sandbox simulator with a rigorous empty compartment. That is
+the boundary working, not the boundary failing.
 
-Read `docs/model-cards/identifiability-800-1500.md` before building anything on
-the Rigor track. Short version: 16 observations, because HYDE reports population
-at century resolution; the Nile is out because PAGES2k has no proxy within
-~1500 km of it; and HYDE's uncertainty envelope turns out to be a single global
-multiplier carrying no region-specific information at all.
+**What does work.** The kernel is fixed-point arithmetic, xoshiro128\*\* with
+per-module substreams, the `Factor[]` ledger, canonical state encoding and a
+from-scratch BLAKE3 verified against all 35 official test vectors. `pnpm
+determinism` replays 1000 runs, checks snapshot/restore equivalence and no-op
+module invariance, with a different-seed control so a constant hash cannot pass.
+`pnpm gate` blocks an INVENTED ancestor anywhere upstream of a Rigor output,
+names the full path, and cannot be relaxed under `NODE_ENV=production`.
 
-This is the outcome the roadmap warned about, arriving before any fitting was
-paid for. Genesis now has three layers rather than two — see
-`docs/decisions/0004-three-layers.md`.
+Sandbox runs 18 subsystems over 5000 simulated years in 85ms, deterministic from
+seed, no float in state, every output refused promotion to Rigor.
 
-Design notes: `docs/interface-bar.md` for the Phase 6 target, `docs/decisions/`
-for ADRs.
+**Known debt.** 47 inline numeric constants across the subsystems are not in the
+registry, so the gate cannot see them. A test pins the count and it only goes
+down.
+
+Model cards in `docs/model-cards/`, decisions in `docs/decisions/`, Phase 6
+design target in `docs/interface-bar.md`.
 
 See `ROADMAP.md`.
 

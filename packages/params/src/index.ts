@@ -18,6 +18,11 @@ export {
 
 export { ParamRegistry, paramDeclSchema, type ParamDecl } from './registry/registry.js';
 export { SANDBOX_PARAMS } from './registry/seed.js';
+export {
+  assertRigorRunnable,
+  RIGOR_PARAMS,
+  RigorUnavailable,
+} from './registry/rigor.js';
 
 export {
   buildDependencyGraph,

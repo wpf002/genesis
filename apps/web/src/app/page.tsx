@@ -9,9 +9,9 @@ const PHASES = [
   { n: 0, name: 'Repo and bootstrap', gate: 'pnpm install && pnpm build && pnpm test passes on a clean clone. CI green.', done: true },
   { n: 1, name: 'Deterministic kernel', gate: '1000 runs at the same seed produce byte-identical terminal state hashes.', done: true },
   { n: 2, name: 'Parameter registry and provenance gate', gate: 'A Rigor run containing one INVENTED parameter anywhere in its output path is refused, with a report naming the parameter and the full path.', done: true },
-  { n: 3, name: 'Rigor Track: identifiability first', gate: 'At least one parameter must be found non-identifiable and handled.', done: false },
-  { n: 4, name: 'Rigor Track: calibration and validation', gate: 'The model card reports at least one honest failure.', done: false },
-  { n: 5, name: 'Sandbox Track: subsystem expansion', gate: 'Full 18-subsystem run, 5000 simulated years, reproducible from seed, no float in state.', done: false },
+  { n: 3, name: 'Rigor Track: identifiability first', gate: 'At least one parameter must be found non-identifiable and handled.', done: true },
+  { n: 4, name: 'Rigor Track: calibration and validation', gate: 'The model card reports at least one honest failure.', done: true },
+  { n: 5, name: 'Sandbox Track: subsystem expansion', gate: 'Full 18-subsystem run, 5000 simulated years, reproducible from seed, no float in state.', done: true },
   { n: 6, name: 'Interface and the provenance inspector', gate: 'Any state value at any tick can be traced to its contributing factors in ≤3 clicks.', done: false },
   { n: 7, name: 'Counterfactual engine', gate: 'A Rigor counterfactual produces an interval and refuses to produce a narrative claim.', done: false },
   { n: 8, name: 'Scenario packs and publishing', gate: 'A third party can reproduce a published run from the permalink alone and get an identical state hash.', done: false },
@@ -63,6 +63,13 @@ export default function Home() {
           Every numeric parameter in Genesis carries a provenance tag.
         </p>
 
+        <p className="mt-6 max-w-2xl border-l-2 pl-4 text-sm leading-relaxed text-ink-secondary" style={{ borderColor: 'var(--prov-invented)' }}>
+          Rigor mode currently has no model. Both parameters it was built around
+          failed: one changes sign depending on preprocessing, the other is beaten
+          by assuming population never changes. Nothing carries CALIBRATED, and a
+          Rigor run is refused rather than returned empty.
+        </p>
+
         <div className="mt-8 grid gap-px overflow-hidden rounded border border-rule bg-rule sm:grid-cols-3">
           {PROVENANCE_ORDER.map((tag) => (
             <ProvenanceCard key={tag} tag={tag} />
@@ -80,9 +87,11 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold tracking-[-0.01em] text-ink">Scope</h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-secondary">
-            Population–yield–climate coupling. Two regions: Nile Valley (primary) and
-            Yellow River (holdout). Window: 500 BCE – 1500 CE. Target: ~12 free
-            parameters. If the count exceeds 15, cut scope.
+            The roadmap scoped Rigor to population–yield–climate coupling over the
+            Nile Valley and Yellow River, 500 BCE – 1500 CE, with ~12 free
+            parameters. The data did not support it. The Nile has no climate proxy
+            within about 1500 km, HYDE reports population once a century, and the
+            two parameters that survived to calibration both failed.
           </p>
         </div>
       </section>
