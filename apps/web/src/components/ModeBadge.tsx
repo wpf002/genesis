@@ -31,7 +31,6 @@ export function ModeBadge({ mode }: { mode: RunMode }) {
     >
       <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: color }} />
       {mode}
-      {isSandbox && <span className="text-ink-muted">— NOT A RESULT</span>}
     </span>
   );
 }

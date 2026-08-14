@@ -57,7 +57,7 @@ export default function Home() {
           >
             Open the provenance inspector →
           </a>
-          <p className="label mt-16">The background is decorative. It is not simulation output.</p>
+          <p className="label mt-16">This is wallpaper.</p>
         </div>
       </section>
 
@@ -70,10 +70,7 @@ export default function Home() {
         </p>
 
         <p className="mt-6 max-w-2xl border-l-2 pl-4 text-sm leading-relaxed text-ink-secondary" style={{ borderColor: 'var(--prov-invented)' }}>
-          Rigor mode currently has no model. Both parameters it was built around
-          failed: one changes sign depending on preprocessing, the other is beaten
-          by assuming population never changes. Nothing carries CALIBRATED, and a
-          Rigor run is refused rather than returned empty.
+          Rigor mode has no model. Both parameters failed. The model cards say why.
         </p>
 
         <div className="mt-8 grid gap-px overflow-hidden rounded border border-rule bg-rule sm:grid-cols-3">
@@ -93,11 +90,12 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold tracking-[-0.01em] text-ink">Scope</h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-secondary">
-            The roadmap scoped Rigor to population–yield–climate coupling over the
-            Nile Valley and Yellow River, 500 BCE – 1500 CE, with ~12 free
-            parameters. The data did not support it. The Nile has no climate proxy
-            within about 1500 km, HYDE reports population once a century, and the
-            two parameters that survived to calibration both failed.
+            Population–yield–climate coupling. Two regions: Nile Valley (primary) and
+            Yellow River (holdout). Window: 500 BCE – 1500 CE. Target: ~12 free
+            parameters. If the count exceeds 15, cut scope.
+          </p>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-muted">
+            That was the plan. The data didn&rsquo;t support it.
           </p>
         </div>
       </section>
