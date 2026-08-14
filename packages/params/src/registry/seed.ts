@@ -15,13 +15,14 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   { key: 'agriculture.yield.tfp_exponent', unit: 'dimensionless', provenance: 'INVENTED', note: 'Cobb-Douglas exponent picked so yield responds visibly but does not run away.', bounds: { min: '0.1', max: '0.9' } },
   { key: 'agriculture.yield.climate_sensitivity', unit: 'tonnes_per_hectare_per_degree', provenance: 'INVENTED', note: 'Scaled so a 1C anomaly moves yield by roughly a tenth.' },
   { key: 'agriculture.soil.depletion_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Slow enough that depletion matters over centuries, not decades.' },
+  { key: 'agriculture.soil.regeneration_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Added when a 5000-year run drove soil to its floor and never recovered. Set so fallow land comes back over a few generations.' },
   { key: 'agriculture.irrigation.capital_decay', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Guess. Makes abandoned canals silt up on a human timescale.' },
   { key: 'agriculture.storage.spoilage_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Chosen so granaries buffer one bad year but not three.' },
 
   // --- demography --------------------------------------------------------
   { key: 'demography.fertility.baseline', unit: 'births_per_woman', provenance: 'INVENTED', note: 'Set near replacement so populations drift rather than explode.' },
   { key: 'demography.mortality.infant_baseline', unit: 'fraction', provenance: 'INVENTED', note: 'Placeholder pending any real life table.' },
-  { key: 'demography.mortality.famine_elasticity', unit: 'dimensionless', provenance: 'INVENTED', note: 'Tuned so a famine is visible in the population curve within a decade.' },
+  { key: 'demography.mortality.famine_elasticity', unit: 'dimensionless', provenance: 'INVENTED', note: 'Raised from 1.5 to 4.0 after a 5000-year run grew the population to 400 billion while starving: famine mortality has to exceed baseline fertility, or nothing bounds growth.' },
   { key: 'demography.migration.push_threshold', unit: 'fraction', provenance: 'INVENTED', note: 'Arbitrary. Migration should start before starvation, not after.' },
   { key: 'demography.cohort.width_years', unit: 'years', provenance: 'INVENTED', note: 'Five-year cohorts because that is the conventional bucket, not because it was fit.' },
 
