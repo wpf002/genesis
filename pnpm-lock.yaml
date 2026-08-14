@@ -77,6 +77,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@genesis/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      '@genesis/models':
+        specifier: workspace:*
+        version: link:../../packages/models
+      '@genesis/params':
+        specifier: workspace:*
+        version: link:../../packages/params
       '@genesis/shared':
         specifier: workspace:*
         version: link:../../packages/shared

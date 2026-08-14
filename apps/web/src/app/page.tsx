@@ -51,6 +51,12 @@ export default function Home() {
             INVENTED parameter. Not a warning — the run is blocked and the gate report
             names the offending parameter and the path.
           </p>
+          <a
+            href="/inspector"
+            className="mt-10 inline-flex items-center gap-2 rounded border border-rule px-4 py-2 font-mono text-xs tracking-[0.08em] text-ink transition-colors hover:bg-surface"
+          >
+            Open the provenance inspector →
+          </a>
           <p className="label mt-16">The background is decorative. It is not simulation output.</p>
         </div>
       </section>
