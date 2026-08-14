@@ -58,3 +58,32 @@ def test_dry_run_is_reproducible() -> None:
     first = dry_run(generated="2026-08-13", sobol_n=128, grid_points=11)
     second = dry_run(generated="2026-08-13", sobol_n=128, grid_points=11)
     assert first.to_json() == second.to_json()
+
+
+def test_global_scaling_increases_observations_by_an_order_of_magnitude() -> None:
+    from pathlib import Path as _P
+
+    from genesis_calibrate.datasets.global_series import build_global
+
+    root = _P("../../data/raw")
+    if not (root / "hyde35/popc_c.txt").exists():
+        import pytest as _pytest
+
+        _pytest.skip("raw data not present")
+    regions = build_global(root)
+    assert len(regions) > 20
+    assert sum(len(r) for r in regions) > 200
+
+
+def test_detrending_is_available_and_changes_the_climate_series() -> None:
+    import numpy as np
+
+    from genesis_calibrate.datasets.series import RegionSeries
+    from genesis_calibrate.models.rigor_global import detrend
+
+    years = np.arange(800.0, 1600.0, 100.0)
+    trending = RegionSeries(
+        "t", years, np.ones(8) * 1e6, np.ones(8) * 1e5, np.linspace(1.0, -1.0, 8)
+    )
+    flat = detrend([trending])[0]
+    assert abs(float(np.polyfit(flat.years, flat.climate, 1)[0])) < 1e-12
