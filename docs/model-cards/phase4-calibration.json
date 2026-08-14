@@ -1,0 +1,84 @@
+{
+  "checks": [
+    {
+      "metric": "r_hat(growth_rate)",
+      "note": "",
+      "passed": true,
+      "test": "V-01",
+      "tolerance": 1.01,
+      "value": 1.0035979675237257
+    },
+    {
+      "metric": "ess_bulk(growth_rate)",
+      "note": "",
+      "passed": true,
+      "test": "V-02",
+      "tolerance": 400,
+      "value": 1453.017580141341
+    },
+    {
+      "metric": "median abs rel error, 1100-1700",
+      "note": "",
+      "passed": true,
+      "test": "V-03",
+      "tolerance": 0.5,
+      "value": 0.4568686609419897
+    },
+    {
+      "metric": "median abs rel error, Africa+Americas",
+      "note": "r fitted on 64 countries, tested on 38",
+      "passed": true,
+      "test": "V-04",
+      "tolerance": 0.75,
+      "value": 0.2786628065367688
+    },
+    {
+      "metric": "share of prior-predictive terminals in 1e3-1e10",
+      "note": "",
+      "passed": true,
+      "test": "V-05",
+      "tolerance": 0.8,
+      "value": 0.8500181818181818
+    },
+    {
+      "metric": "ablated error worse by",
+      "note": "logistic 0.457 vs exponential 0.559",
+      "passed": true,
+      "test": "V-06",
+      "tolerance": 0.1,
+      "value": 0.2240972053235755
+    },
+    {
+      "metric": "backcast error / persistence error",
+      "note": "model 0.457 vs frozen-population 0.293",
+      "passed": false,
+      "test": "V-08",
+      "tolerance": 1.0,
+      "value": 1.5603439929648164
+    },
+    {
+      "metric": "share of continental pairs whose 94% intervals overlap",
+      "note": "2/6 overlap; europe [0.0724, 0.0885]; asia [0.0903, 0.1159]; africa [0.2072, 0.2403]; americas [0.0714, 0.1174]",
+      "passed": false,
+      "test": "V-09",
+      "tolerance": 1.0,
+      "value": 0.3333333333333333
+    },
+    {
+      "metric": "94% HDI width / mean",
+      "note": "",
+      "passed": true,
+      "test": "V-07",
+      "tolerance": 0.5,
+      "value": 0.1476555187956503
+    }
+  ],
+  "countries": 110,
+  "generated": "2026-08-14",
+  "growth_rate": {
+    "hdi_94_lower": 0.17479812385293386,
+    "hdi_94_upper": 0.2027630264079089,
+    "mean": 0.1893928705345406
+  },
+  "observations": 1980
+}
