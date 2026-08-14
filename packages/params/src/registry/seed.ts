@@ -52,6 +52,9 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   // --- politics ----------------------------------------------------------
   { key: 'politics.legitimacy.decay', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Legitimacy erodes on a scale that makes dynasties turn over.' },
   { key: 'politics.elite.overproduction_threshold', unit: 'ratio', provenance: 'INVENTED', note: 'Borrowed shape from cliodynamics, but the number itself is a guess.' },
+  { key: 'politics.elite.production_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Was an inline literal until a 5000-year run pinned fragmentation at 0.9 and crushed legitimacy to zero. Tuned so the elite-to-positions ratio sits near the threshold and climate noise pushes it over episodically.' },
+  { key: 'politics.elite.attrition_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Rate elites are shed. Sets the equilibrium elite count together with production_rate.' },
+  { key: 'politics.legitimacy.restoration_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'How fast full bellies buy legitimacy back. Must outpace decay or every state collapses once and never recovers.' },
   { key: 'politics.state.fragmentation_pressure', unit: 'dimensionless', provenance: 'INVENTED', note: 'Chosen so large empires are unstable, which is the behavior I wanted.' },
 
   // --- culture -----------------------------------------------------------

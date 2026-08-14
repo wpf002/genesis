@@ -13,11 +13,16 @@
 import type { SimModule } from '@genesis/kernel';
 import { agriculture } from './sandbox/agriculture.js';
 import { conflictLanchester, conflictLogistics } from './sandbox/conflict.js';
+import { cultureReplicator, cultureTransmission } from './sandbox/culture.js';
 import { demography } from './sandbox/demography.js';
 import { diseaseSeird, diseaseSpatial } from './sandbox/disease.js';
 import { economy } from './sandbox/economy.js';
+import { irrigation, tradeRoutes } from './sandbox/infrastructure.js';
 import { migration } from './sandbox/migration.js';
+import { politicsElites, politicsLegitimacy } from './sandbox/politics.js';
+import { prices } from './sandbox/prices.js';
 import { SandboxParams } from './sandbox/resolve.js';
+import { technologyAdoption, technologyDiffusion } from './sandbox/technology.js';
 import { trade } from './sandbox/trade.js';
 
 export { SandboxParams } from './sandbox/resolve.js';
@@ -34,6 +39,15 @@ export const MODULE_ORDER: readonly string[] = [
   'disease_seird',
   'conflict_logistics',
   'conflict_lanchester',
+  'prices',
+  'politics_elites',
+  'politics_legitimacy',
+  'culture_transmission',
+  'culture_replicator',
+  'irrigation',
+  'trade_routes',
+  'technology_diffusion',
+  'technology_adoption',
 ];
 
 export function sandboxModules(params = new SandboxParams()): readonly SimModule[] {
@@ -47,6 +61,15 @@ export function sandboxModules(params = new SandboxParams()): readonly SimModule
     diseaseSeird(params),
     conflictLogistics(params),
     conflictLanchester(params),
+    prices(params),
+    politicsElites(params),
+    politicsLegitimacy(params),
+    cultureTransmission(params),
+    cultureReplicator(params),
+    irrigation(params),
+    tradeRoutes(params),
+    technologyDiffusion(params),
+    technologyAdoption(params),
   ];
 
   // The declared order is the contract; this catches a module added to one list

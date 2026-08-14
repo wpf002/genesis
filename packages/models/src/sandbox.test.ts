@@ -93,3 +93,28 @@ describe('the gate refuses to promote any of this', () => {
     expect(report.watermarkRequired).toBe(true);
   });
 });
+
+describe('unregistered constants', () => {
+  // 47 inline literals against 33 registered parameters when the 18th subsystem
+  // landed. Every one of them is a number driving behaviour that the gate cannot
+  // see and the ledger cannot attribute - the exact thing the provenance system
+  // exists to prevent, reintroduced inside the subsystems.
+  //
+  // Some are structurally legitimate: percent conversions, divide-by-zero
+  // guards, the 2 in "uniform on [-1,1)". Most are not. This budget only ever
+  // goes down; lower it when you register one.
+  const BUDGET = 47;
+
+  it('does not grow the inline-literal count', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const dir = new URL('./sandbox/', import.meta.url).pathname;
+
+    let count = 0;
+    for (const file of readdirSync(dir).filter((f) => f.endsWith('.ts'))) {
+      const source = readFileSync(join(dir, file), 'utf8');
+      count += (source.match(/Fx\.parse\('[0-9.]+'\)|Fx\.fromInt\([0-9]+\)/g) ?? []).length;
+    }
+    expect(count).toBeLessThanOrEqual(BUDGET);
+  });
+});

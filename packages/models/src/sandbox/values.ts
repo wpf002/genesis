@@ -52,6 +52,9 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   // politics
   'politics.legitimacy.decay': '0.03',
   'politics.elite.overproduction_threshold': '1.4',
+  'politics.elite.production_rate': '0.0009',
+  'politics.elite.attrition_rate': '0.01',
+  'politics.legitimacy.restoration_rate': '0.06',
   'politics.state.fragmentation_pressure': '0.5',
 
   // culture
