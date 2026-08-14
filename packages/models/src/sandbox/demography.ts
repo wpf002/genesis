@@ -46,10 +46,19 @@ export function demography(params: SandboxParams): SimModule {
       );
       const deaths = Fx.mul(population, Fx.div(mortality, Fx.fromInt(100)));
 
-      ctx.set('population', Fx.max(Fx.ZERO, Fx.add(Fx.sub(population, deaths), births)), [
+      // Migration ran this tick; disease is read a tick late, which is what the
+      // fixed module order buys and costs.
+      const leaving = ctx.get('migration.outflow');
+      const infectious = ctx.get('disease_seird.infectious');
+      const plague = Fx.mul(population, Fx.mul(infectious, Fx.parse('0.05')));
+
+      const next = Fx.sub(Fx.add(Fx.sub(population, deaths), births), Fx.add(leaving, plague));
+      ctx.set('population', Fx.max(Fx.ZERO, next), [
         params.factor('demography.fertility.baseline', births),
         params.factor('demography.mortality.infant_baseline', Fx.neg(deaths)),
         params.factor('demography.mortality.famine_elasticity', Fx.neg(shortfall)),
+        params.factor('demography.migration.push_threshold', Fx.neg(leaving)),
+        params.factor('disease.seird.case_fatality', Fx.neg(plague)),
       ]);
     },
   };

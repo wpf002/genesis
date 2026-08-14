@@ -12,8 +12,11 @@
 
 import type { SimModule } from '@genesis/kernel';
 import { agriculture } from './sandbox/agriculture.js';
+import { conflictLanchester, conflictLogistics } from './sandbox/conflict.js';
 import { demography } from './sandbox/demography.js';
+import { diseaseSeird, diseaseSpatial } from './sandbox/disease.js';
 import { economy } from './sandbox/economy.js';
+import { migration } from './sandbox/migration.js';
 import { SandboxParams } from './sandbox/resolve.js';
 import { trade } from './sandbox/trade.js';
 
@@ -23,13 +26,28 @@ export { SANDBOX_VALUES } from './sandbox/values.js';
 /** The order subsystems run in. Adding one appends here, deliberately. */
 export const MODULE_ORDER: readonly string[] = [
   'agriculture',
+  'migration',
   'demography',
   'economy',
   'trade',
+  'disease_spatial',
+  'disease_seird',
+  'conflict_logistics',
+  'conflict_lanchester',
 ];
 
 export function sandboxModules(params = new SandboxParams()): readonly SimModule[] {
-  const modules = [agriculture(params), demography(params), economy(params), trade(params)];
+  const modules = [
+    agriculture(params),
+    migration(params),
+    demography(params),
+    economy(params),
+    trade(params),
+    diseaseSpatial(params),
+    diseaseSeird(params),
+    conflictLogistics(params),
+    conflictLanchester(params),
+  ];
 
   // The declared order is the contract; this catches a module added to one list
   // and not the other rather than letting execution order drift silently.
