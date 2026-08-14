@@ -43,7 +43,7 @@ export function diseaseSeird(params: SandboxParams): SimModule {
       const newlyInfectious = Fx.clamp(Fx.mul(e, incubation), Fx.ZERO, e);
 
       // Removal splits into deaths and recoveries.
-      const removalRate = Fx.parse('0.2');
+      const removalRate = params.get('disease.seird.removal_rate');
       const removed = Fx.clamp(Fx.mul(i, removalRate), Fx.ZERO, i);
       const fatality = params.get('disease.seird.case_fatality');
       const died = Fx.mul(removed, fatality);
@@ -51,7 +51,7 @@ export function diseaseSeird(params: SandboxParams): SimModule {
 
       // Waning immunity returns the recovered to susceptible, so the toy can
       // have more than one epidemic in 5000 years.
-      const waning = Fx.mul(r, Fx.parse('0.01'));
+      const waning = Fx.mul(r, params.get('disease.seird.waning_rate'));
 
       ctx.set('susceptible', Fx.clamp(Fx.add(Fx.sub(s, newlyExposed), waning), Fx.ZERO, ONE), [
         params.factor('disease.seird.beta_baseline', Fx.neg(newlyExposed)),
@@ -78,8 +78,9 @@ export function diseaseSpatial(params: SandboxParams): SimModule {
     stateKeys: ['importPressure'],
 
     init(ctx) {
-      ctx.set('importPressure', Fx.parse('0.001'), [
-        params.factor('disease.spatial.coupling_strength', Fx.parse('0.001')),
+      const initial = params.get('disease.spatial.initial_pressure');
+      ctx.set('importPressure', initial, [
+        params.factor('disease.spatial.initial_pressure', initial),
       ]);
     },
 
@@ -92,7 +93,9 @@ export function diseaseSpatial(params: SandboxParams): SimModule {
       const coupling = params.get('disease.spatial.coupling_strength');
 
       // A rare arrival, drawn from this module's own substream.
-      const arrival = ctx.rng.nextBelow(200) === 0 ? Fx.parse('0.02') : Fx.ZERO;
+      const arrival = ctx.rng.nextBelow(params.getInt('disease.spatial.arrival_odds')) === 0
+          ? params.get('disease.spatial.arrival_magnitude')
+          : Fx.ZERO;
       const pressure = Fx.add(Fx.div(Fx.mul(traffic, coupling), HUNDRED), arrival);
 
       ctx.set('importPressure', Fx.clamp(pressure, Fx.ZERO, ONE), [

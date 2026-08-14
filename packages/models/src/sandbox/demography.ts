@@ -8,8 +8,8 @@ import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
 export function demography(params: SandboxParams): SimModule {
-  const INITIAL = Fx.fromInt(1000);
-  const NEED_PER_HEAD = Fx.parse('0.002');
+  const INITIAL = params.get('demography.population.initial');
+  const NEED_PER_HEAD = params.get('demography.consumption.need_per_head');
 
   return {
     id: 'demography',
@@ -29,7 +29,7 @@ export function demography(params: SandboxParams): SimModule {
       const storage = ctx.get('agriculture.storage');
 
       const need = Fx.max(Fx.parse('0.000001'), Fx.mul(population, NEED_PER_HEAD));
-      const ratio = Fx.clamp(Fx.div(storage, need), Fx.ZERO, TWO_CAP);
+      const ratio = Fx.clamp(Fx.div(storage, need), Fx.ZERO, params.get('demography.consumption.max_food_ratio'));
       ctx.set('foodRatio', ratio, [
         params.factor('demography.migration.push_threshold', ratio),
       ]);
@@ -50,7 +50,7 @@ export function demography(params: SandboxParams): SimModule {
       // fixed module order buys and costs.
       const leaving = ctx.get('migration.outflow');
       const infectious = ctx.get('disease_seird.infectious');
-      const plague = Fx.mul(population, Fx.mul(infectious, Fx.parse('0.05')));
+      const plague = Fx.mul(population, Fx.mul(infectious, params.get('demography.mortality.plague_coefficient')));
 
       const next = Fx.sub(Fx.add(Fx.sub(population, deaths), births), Fx.add(leaving, plague));
       ctx.set('population', Fx.max(Fx.ZERO, next), [
@@ -64,4 +64,3 @@ export function demography(params: SandboxParams): SimModule {
   };
 }
 
-const TWO_CAP = Fx.fromInt(2);

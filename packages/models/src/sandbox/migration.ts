@@ -33,7 +33,10 @@ export function migration(params: SandboxParams): SimModule {
       // A tenth of the shortfall leaves per tick, capped so a bad year cannot
       // empty the region outright.
       const population = ctx.get('demography.population');
-      const share = Fx.min(Fx.mul(pressure, Fx.parse('0.1')), Fx.parse('0.05'));
+      const share = Fx.min(
+        Fx.mul(pressure, params.get('demography.migration.outflow_share')),
+        params.get('demography.migration.outflow_cap'),
+      );
       ctx.set('outflow', Fx.mul(population, share), [
         params.factor('demography.migration.push_threshold', share),
       ]);

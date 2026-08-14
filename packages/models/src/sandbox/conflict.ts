@@ -24,7 +24,7 @@ export function conflictLanchester(params: SandboxParams): SimModule {
     tick(ctx) {
       // Armies are raised out of surplus, not out of nothing.
       const surplus = ctx.get('economy.surplus');
-      const raised = Fx.mul(surplus, Fx.parse('0.1'));
+      const raised = Fx.mul(surplus, params.get('conflict.recruitment.surplus_share'));
       const strength = Fx.add(ctx.get('conflict_lanchester.strength'), raised);
 
       // Square-law attrition against a threat that scales with the same mass.
@@ -53,8 +53,6 @@ export function conflictLanchester(params: SandboxParams): SimModule {
 }
 
 export function conflictLogistics(params: SandboxParams): SimModule {
-  const NOMINAL_RANGE_KM = Fx.fromInt(500);
-
   return {
     id: 'conflict_logistics',
     stateKeys: ['reach'],
@@ -68,13 +66,13 @@ export function conflictLogistics(params: SandboxParams): SimModule {
     tick(ctx) {
       // Reach falls off with distance and recovers with capital: roads, depots.
       const penalty = params.get('conflict.logistics.range_penalty');
-      const decay = Fx.mul(penalty, NOMINAL_RANGE_KM);
+      const decay = Fx.mul(penalty, params.get('conflict.logistics.nominal_range_km'));
       const capital = ctx.get('economy.capital');
-      const support = Fx.div(capital, Fx.add(capital, Fx.fromInt(10)));
+      const support = Fx.div(capital, Fx.add(capital, params.get('conflict.logistics.support_halfsat')));
 
       const reach = Fx.clamp(
-        Fx.add(Fx.sub(Fx.ONE, decay), Fx.mul(support, Fx.parse('0.2'))),
-        Fx.parse('0.05'),
+        Fx.add(Fx.sub(Fx.ONE, decay), Fx.mul(support, params.get('conflict.logistics.support_weight'))),
+        params.get('conflict.logistics.min_reach'),
         Fx.ONE,
       );
       ctx.set('reach', reach, [

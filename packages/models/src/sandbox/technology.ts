@@ -35,7 +35,7 @@ export function technologyDiffusion(params: SandboxParams): SimModule {
       // is retained rather than lost.
       const stock = ctx.get('technology_diffusion.stock');
       const gained = Fx.mul(ctx.get('culture_transmission.novelty'), exposure);
-      const forgotten = Fx.mul(stock, Fx.parse('0.001'));
+      const forgotten = Fx.mul(stock, params.get('technology.diffusion.forgetting_rate'));
       ctx.set('stock', Fx.max(Fx.ZERO, Fx.add(Fx.sub(stock, forgotten), gained)), [
         params.factor('technology.diffusion.contact_rate', gained),
         params.factor('culture.innovation.novelty_rate', gained),
@@ -65,7 +65,7 @@ export function technologyAdoption(params: SandboxParams): SimModule {
 
       const available = Fx.clamp(Fx.div(stock, Fx.add(stock, Fx.ONE)), Fx.ZERO, Fx.ONE);
       const pull = Fx.mul(available, Fx.sub(Fx.ONE, adopted));
-      const speed = Fx.mul(threshold, Fx.parse('0.1'));
+      const speed = Fx.mul(threshold, params.get('technology.adoption.speed'));
       const next = Fx.clamp(Fx.add(adopted, Fx.mul(pull, speed)), Fx.ZERO, Fx.ONE);
 
       ctx.set('adopted', next, [

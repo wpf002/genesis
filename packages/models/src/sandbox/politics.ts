@@ -50,8 +50,9 @@ export function politicsElites(params: SandboxParams): SimModule {
     stateKeys: ['elites', 'fragmentation'],
 
     init(ctx) {
-      ctx.set('elites', Fx.parse('0.01'), [
-        params.factor('politics.elite.overproduction_threshold', Fx.parse('0.01')),
+      const initial = params.get('politics.elite.initial_share');
+      ctx.set('elites', initial, [
+        params.factor('politics.elite.initial_share', initial),
       ]);
       ctx.set('fragmentation', Fx.ZERO, [
         params.factor('politics.state.fragmentation_pressure', Fx.ZERO),
@@ -77,7 +78,7 @@ export function politicsElites(params: SandboxParams): SimModule {
 
       // Positions available scale with urbanisation. Past the threshold, the
       // surplus elites turn into fragmentation pressure.
-      const positions = Fx.add(ctx.get('economy.urbanShare'), Fx.parse('0.01'));
+      const positions = Fx.add(ctx.get('economy.urbanShare'), params.get('politics.elite.positions_floor'));
       const ratio = Fx.div(nextElites, positions);
       const threshold = params.get('politics.elite.overproduction_threshold');
       const excess = Fx.max(Fx.ZERO, Fx.sub(ratio, threshold));

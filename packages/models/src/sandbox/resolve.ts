@@ -37,6 +37,12 @@ export class SandboxParams {
     return value;
   }
 
+  /** For parameters the RNG needs as a plain integer, e.g. odds. */
+  getInt(key: string): number {
+    const raw = Fx.raw(this.get(key)) / 1_000_000n;
+    return Number(raw);
+  }
+
   /** A factor carrying this parameter's declared provenance, never a guess at it. */
   factor(key: string, contribution: Fixed): Factor {
     const declared = this.registry.require(key);

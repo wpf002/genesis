@@ -6,8 +6,6 @@ import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
 export function prices(params: SandboxParams): SimModule {
-  const CEILING = Fx.fromInt(20);
-
   return {
     id: 'prices',
     stateKeys: ['grain'],
@@ -27,8 +25,8 @@ export function prices(params: SandboxParams): SimModule {
       const deviation = Fx.sub(Fx.div(Fx.ONE, ratio), Fx.ONE);
       const grain = Fx.clamp(
         Fx.add(Fx.ONE, Fx.mul(deviation, elasticity)),
-        Fx.parse('0.05'),
-        CEILING,
+        params.get('economy.price.floor'),
+        params.get('economy.price.ceiling'),
       );
       ctx.set('grain', grain, [
         params.factor('economy.price.elasticity_grain', Fx.mul(deviation, elasticity)),

@@ -95,15 +95,13 @@ describe('the gate refuses to promote any of this', () => {
 });
 
 describe('unregistered constants', () => {
-  // 47 inline literals against 33 registered parameters when the 18th subsystem
-  // landed. Every one of them is a number driving behaviour that the gate cannot
-  // see and the ledger cannot attribute - the exact thing the provenance system
-  // exists to prevent, reintroduced inside the subsystems.
+  // Was 47 against 33 registered parameters when the 18th subsystem landed.
+  // 35 of them were behavioural knobs the gate could not see; those are now
+  // declared. The 7 that remain are structural and are not parameters: percent
+  // conversions, divide-by-zero guards, and the 2 in "uniform on [-1,1)".
   //
-  // Some are structurally legitimate: percent conversions, divide-by-zero
-  // guards, the 2 in "uniform on [-1,1)". Most are not. This budget only ever
-  // goes down; lower it when you register one.
-  const BUDGET = 47;
+  // This budget only ever goes down.
+  const BUDGET = 7;
 
   it('does not grow the inline-literal count', async () => {
     const { readdirSync, readFileSync } = await import('node:fs');

@@ -8,7 +8,7 @@ import type { SandboxParams } from './resolve.js';
 
 export function agriculture(params: SandboxParams): SimModule {
   const TWO = Fx.fromInt(2);
-  const BASE_YIELD = Fx.parse('1.2');
+  const BASE_YIELD = params.get('agriculture.yield.base');
 
   return {
     id: 'agriculture',
@@ -44,7 +44,7 @@ export function agriculture(params: SandboxParams): SimModule {
       const depletion = Fx.mul(soil, params.get('agriculture.soil.depletion_rate'));
       const headroom = Fx.max(Fx.ZERO, Fx.sub(Fx.ONE, soil));
       const regrowth = Fx.mul(headroom, params.get('agriculture.soil.regeneration_rate'));
-      const nextSoil = Fx.clamp(Fx.add(Fx.sub(soil, depletion), regrowth), Fx.parse('0.1'), Fx.ONE);
+      const nextSoil = Fx.clamp(Fx.add(Fx.sub(soil, depletion), regrowth), params.get('agriculture.soil.minimum_quality'), Fx.ONE);
       ctx.set('soilQuality', nextSoil, [
         params.factor('agriculture.soil.depletion_rate', Fx.neg(depletion)),
         params.factor('agriculture.soil.regeneration_rate', regrowth),

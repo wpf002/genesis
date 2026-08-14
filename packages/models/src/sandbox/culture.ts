@@ -13,7 +13,7 @@ export function cultureReplicator(params: SandboxParams): SimModule {
     stateKeys: ['sectA', 'sectB'],
 
     init(ctx) {
-      const half = Fx.parse('0.5');
+      const half = params.get('culture.sect.initial_share');
       ctx.set('sectA', half, [
         params.factor('culture.replicator.selection_strength', half),
       ]);
@@ -60,8 +60,9 @@ export function cultureTransmission(params: SandboxParams): SimModule {
     stateKeys: ['churn', 'novelty'],
 
     init(ctx) {
-      ctx.set('churn', Fx.parse('0.1'), [
-        params.factor('culture.transmission.vertical_bias', Fx.parse('0.1')),
+      const initial = params.get('culture.transmission.initial_churn');
+      ctx.set('churn', initial, [
+        params.factor('culture.transmission.initial_churn', initial),
       ]);
       ctx.set('novelty', Fx.ZERO, [
         params.factor('culture.innovation.novelty_rate', Fx.ZERO),
@@ -75,8 +76,8 @@ export function cultureTransmission(params: SandboxParams): SimModule {
       const horizontal = Fx.sub(Fx.ONE, vertical);
       const contact = ctx.get('economy.urbanShare');
       const churn = Fx.clamp(
-        Fx.mul(horizontal, Fx.add(Fx.parse('0.05'), contact)),
-        Fx.parse('0.001'),
+        Fx.mul(horizontal, Fx.add(params.get('culture.transmission.base_contact'), contact)),
+        params.get('culture.transmission.min_churn'),
         Fx.ONE,
       );
       ctx.set('churn', churn, [

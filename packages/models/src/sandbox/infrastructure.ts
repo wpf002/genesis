@@ -26,7 +26,7 @@ export function irrigation(params: SandboxParams): SimModule {
       // Built out of economic surplus, and only while the state holds together.
       const surplus = ctx.get('economy.surplus');
       const legitimacy = ctx.get('politics_legitimacy.legitimacy');
-      const built = Fx.mul(Fx.mul(surplus, legitimacy), Fx.parse('0.05'));
+      const built = Fx.mul(Fx.mul(surplus, legitimacy), params.get('agriculture.irrigation.build_share'));
 
       const next = Fx.max(Fx.ZERO, Fx.add(Fx.sub(capital, decay), built));
       ctx.set('capital', next, [
@@ -35,7 +35,7 @@ export function irrigation(params: SandboxParams): SimModule {
       ]);
 
       // Diminishing returns, so canals cannot make a desert arbitrarily fertile.
-      ctx.set('yieldBonus', Fx.div(next, Fx.add(next, Fx.fromInt(5))), [
+      ctx.set('yieldBonus', Fx.div(next, Fx.add(next, params.get('agriculture.irrigation.bonus_halfsat'))), [
         params.factor('agriculture.irrigation.capital_decay', next),
       ]);
     },
@@ -60,18 +60,18 @@ export function tradeRoutes(params: SandboxParams): SimModule {
       // Distance decay: with one region the nominal distance is fixed, and the
       // exponent enters exactly where it will when a real map arrives.
       const exponent = params.get('trade.gravity.distance_exponent');
-      const nominal = Fx.fromInt(1000);
-      const friction = Fx.div(Fx.mul(nominal, exponent), Fx.fromInt(10000));
+      const nominal = params.get('trade.route.nominal_distance_km');
+      const friction = Fx.div(Fx.mul(nominal, exponent), params.get('trade.route.distance_scale'));
 
       const capital = ctx.get('economy.capital');
-      const upkeep = Fx.div(capital, Fx.add(capital, Fx.fromInt(20)));
+      const upkeep = Fx.div(capital, Fx.add(capital, params.get('trade.route.upkeep_halfsat')));
       ctx.set('maintenance', upkeep, [
         params.factor('trade.route.risk_premium', upkeep),
       ]);
 
       const reach = Fx.clamp(
-        Fx.add(Fx.sub(Fx.ONE, friction), Fx.mul(upkeep, Fx.parse('0.3'))),
-        Fx.parse('0.05'),
+        Fx.add(Fx.sub(Fx.ONE, friction), Fx.mul(upkeep, params.get('trade.route.upkeep_weight'))),
+        params.get('trade.route.min_reach'),
         Fx.ONE,
       );
       ctx.set('reach', reach, [
