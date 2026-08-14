@@ -11,9 +11,10 @@ import type { SandboxParams } from './resolve.js';
 const ONE = Fx.ONE;
 const HUNDRED = Fx.fromInt(100);
 
-export function diseaseSeird(params: SandboxParams): SimModule {
+export function diseaseSeird(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'disease_seird',
+    id: q('disease_seird'),
     stateKeys: ['susceptible', 'exposed', 'infectious', 'recovered', 'dead'],
 
     init(ctx) {
@@ -26,13 +27,13 @@ export function diseaseSeird(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const s = ctx.get('disease_seird.susceptible');
-      const e = ctx.get('disease_seird.exposed');
-      const i = ctx.get('disease_seird.infectious');
-      const r = ctx.get('disease_seird.recovered');
+      const s = ctx.get(q('disease_seird.susceptible'));
+      const e = ctx.get(q('disease_seird.exposed'));
+      const i = ctx.get(q('disease_seird.infectious'));
+      const r = ctx.get(q('disease_seird.recovered'));
 
       const beta = params.get('disease.seird.beta_baseline');
-      const pressure = ctx.get('disease_spatial.importPressure');
+      const pressure = ctx.get(q('disease_spatial.importPressure'));
 
       // New exposures from local transmission plus imported cases.
       const contact = Fx.add(Fx.mul(beta, i), pressure);
@@ -65,16 +66,17 @@ export function diseaseSeird(params: SandboxParams): SimModule {
       ctx.set('recovered', Fx.max(Fx.ZERO, Fx.add(Fx.sub(r, waning), recoveredNow)), [
         params.factor('disease.seird.case_fatality', recoveredNow),
       ]);
-      ctx.set('dead', Fx.add(ctx.get('disease_seird.dead'), died), [
+      ctx.set('dead', Fx.add(ctx.get(q('disease_seird.dead')), died), [
         params.factor('disease.seird.case_fatality', died),
       ]);
     },
   };
 }
 
-export function diseaseSpatial(params: SandboxParams): SimModule {
+export function diseaseSpatial(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'disease_spatial',
+    id: q('disease_spatial'),
     stateKeys: ['importPressure'],
 
     init(ctx) {
@@ -87,7 +89,7 @@ export function diseaseSpatial(params: SandboxParams): SimModule {
     tick(ctx) {
       // Traffic carries disease. Volume is capped upstream, so normalise by the
       // cap to keep pressure a fraction.
-      const volume = ctx.get('trade.volume');
+      const volume = ctx.get(q('trade.volume'));
       const cap = params.get('trade.port.throughput_cap');
       const traffic = Fx.clamp(Fx.div(volume, cap), Fx.ZERO, ONE);
       const coupling = params.get('disease.spatial.coupling_strength');

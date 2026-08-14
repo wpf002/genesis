@@ -7,9 +7,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function economy(params: SandboxParams): SimModule {
+export function economy(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'economy',
+    id: q('economy'),
     stateKeys: ['surplus', 'capital', 'urbanShare'],
 
     init(ctx) {
@@ -25,14 +26,14 @@ export function economy(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const storage = ctx.get('agriculture.storage');
+      const storage = ctx.get(q('agriculture.storage'));
       const rate = params.get('economy.surplus.extraction_rate');
       const surplus = Fx.mul(storage, rate);
       ctx.set('surplus', surplus, [
         params.factor('economy.surplus.extraction_rate', surplus),
       ]);
 
-      const capital = ctx.get('economy.capital');
+      const capital = ctx.get(q('economy.capital'));
       const depreciation = Fx.mul(capital, params.get('economy.capital.depreciation'));
       ctx.set('capital', Fx.max(Fx.ZERO, Fx.add(Fx.sub(capital, depreciation), surplus)), [
         params.factor('economy.surplus.extraction_rate', surplus),
@@ -41,7 +42,7 @@ export function economy(params: SandboxParams): SimModule {
 
       // Urban share tracks food ratio, capped.
       const cap = params.get('economy.labour.urban_share_cap');
-      const ratio = ctx.get('demography.foodRatio');
+      const ratio = ctx.get(q('demography.foodRatio'));
       const target = Fx.min(cap, Fx.mul(cap, ratio));
       ctx.set('urbanShare', Fx.max(Fx.ZERO, target), [
         params.factor('economy.labour.urban_share_cap', target),

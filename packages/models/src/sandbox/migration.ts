@@ -8,9 +8,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function migration(params: SandboxParams): SimModule {
+export function migration(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'migration',
+    id: q('migration'),
     stateKeys: ['outflow', 'pressure'],
 
     init(ctx) {
@@ -23,7 +24,7 @@ export function migration(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const ratio = ctx.get('demography.foodRatio');
+      const ratio = ctx.get(q('demography.foodRatio'));
       const threshold = params.get('demography.migration.push_threshold');
       const pressure = Fx.max(Fx.ZERO, Fx.sub(threshold, ratio));
       ctx.set('pressure', pressure, [
@@ -32,7 +33,7 @@ export function migration(params: SandboxParams): SimModule {
 
       // A tenth of the shortfall leaves per tick, capped so a bad year cannot
       // empty the region outright.
-      const population = ctx.get('demography.population');
+      const population = ctx.get(q('demography.population'));
       const share = Fx.min(
         Fx.mul(pressure, params.get('demography.migration.outflow_share')),
         params.get('demography.migration.outflow_cap'),

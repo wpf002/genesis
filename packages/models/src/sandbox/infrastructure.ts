@@ -5,9 +5,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function irrigation(params: SandboxParams): SimModule {
+export function irrigation(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'irrigation',
+    id: q('irrigation'),
     stateKeys: ['capital', 'yieldBonus'],
 
     init(ctx) {
@@ -20,12 +21,12 @@ export function irrigation(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const capital = ctx.get('irrigation.capital');
+      const capital = ctx.get(q('irrigation.capital'));
       const decay = Fx.mul(capital, params.get('agriculture.irrigation.capital_decay'));
 
       // Built out of economic surplus, and only while the state holds together.
-      const surplus = ctx.get('economy.surplus');
-      const legitimacy = ctx.get('politics_legitimacy.legitimacy');
+      const surplus = ctx.get(q('economy.surplus'));
+      const legitimacy = ctx.get(q('politics_legitimacy.legitimacy'));
       const built = Fx.mul(Fx.mul(surplus, legitimacy), params.get('agriculture.irrigation.build_share'));
 
       const next = Fx.max(Fx.ZERO, Fx.add(Fx.sub(capital, decay), built));
@@ -42,9 +43,10 @@ export function irrigation(params: SandboxParams): SimModule {
   };
 }
 
-export function tradeRoutes(params: SandboxParams): SimModule {
+export function tradeRoutes(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'trade_routes',
+    id: q('trade_routes'),
     stateKeys: ['reach', 'maintenance'],
 
     init(ctx) {
@@ -63,7 +65,7 @@ export function tradeRoutes(params: SandboxParams): SimModule {
       const nominal = params.get('trade.route.nominal_distance_km');
       const friction = Fx.div(Fx.mul(nominal, exponent), params.get('trade.route.distance_scale'));
 
-      const capital = ctx.get('economy.capital');
+      const capital = ctx.get(q('economy.capital'));
       const upkeep = Fx.div(capital, Fx.add(capital, params.get('trade.route.upkeep_halfsat')));
       ctx.set('maintenance', upkeep, [
         params.factor('trade.route.risk_premium', upkeep),

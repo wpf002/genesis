@@ -8,9 +8,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function politicsLegitimacy(params: SandboxParams): SimModule {
+export function politicsLegitimacy(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'politics_legitimacy',
+    id: q('politics_legitimacy'),
     stateKeys: ['legitimacy'],
 
     init(ctx) {
@@ -20,13 +21,13 @@ export function politicsLegitimacy(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const legitimacy = ctx.get('politics_legitimacy.legitimacy');
+      const legitimacy = ctx.get(q('politics_legitimacy.legitimacy'));
       const decay = Fx.mul(legitimacy, params.get('politics.legitimacy.decay'));
 
       // Full bellies and a working state restore legitimacy; famine and
       // fragmentation eat it.
-      const food = ctx.get('demography.foodRatio');
-      const fragmentation = ctx.get('politics_elites.fragmentation');
+      const food = ctx.get(q('demography.foodRatio'));
+      const fragmentation = ctx.get(q('politics_elites.fragmentation'));
       const restoration = params.get('politics.legitimacy.restoration_rate');
       const restored = Fx.mul(Fx.min(food, Fx.ONE), restoration);
 
@@ -44,9 +45,10 @@ export function politicsLegitimacy(params: SandboxParams): SimModule {
   };
 }
 
-export function politicsElites(params: SandboxParams): SimModule {
+export function politicsElites(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'politics_elites',
+    id: q('politics_elites'),
     stateKeys: ['elites', 'fragmentation'],
 
     init(ctx) {
@@ -60,8 +62,8 @@ export function politicsElites(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const elites = ctx.get('politics_elites.elites');
-      const surplus = ctx.get('economy.surplus');
+      const elites = ctx.get(q('politics_elites.elites'));
+      const surplus = ctx.get(q('economy.surplus'));
 
       // Elites are produced out of surplus and shed when there is none.
       const produced = Fx.mul(surplus, params.get('politics.elite.production_rate'));
@@ -78,7 +80,7 @@ export function politicsElites(params: SandboxParams): SimModule {
 
       // Positions available scale with urbanisation. Past the threshold, the
       // surplus elites turn into fragmentation pressure.
-      const positions = Fx.add(ctx.get('economy.urbanShare'), params.get('politics.elite.positions_floor'));
+      const positions = Fx.add(ctx.get(q('economy.urbanShare')), params.get('politics.elite.positions_floor'));
       const ratio = Fx.div(nextElites, positions);
       const threshold = params.get('politics.elite.overproduction_threshold');
       const excess = Fx.max(Fx.ZERO, Fx.sub(ratio, threshold));

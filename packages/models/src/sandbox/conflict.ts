@@ -7,9 +7,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function conflictLanchester(params: SandboxParams): SimModule {
+export function conflictLanchester(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'conflict_lanchester',
+    id: q('conflict_lanchester'),
     stateKeys: ['strength', 'losses'],
 
     init(ctx) {
@@ -23,9 +24,9 @@ export function conflictLanchester(params: SandboxParams): SimModule {
 
     tick(ctx) {
       // Armies are raised out of surplus, not out of nothing.
-      const surplus = ctx.get('economy.surplus');
+      const surplus = ctx.get(q('economy.surplus'));
       const raised = Fx.mul(surplus, params.get('conflict.recruitment.surplus_share'));
-      const strength = Fx.add(ctx.get('conflict_lanchester.strength'), raised);
+      const strength = Fx.add(ctx.get(q('conflict_lanchester.strength')), raised);
 
       // Square-law attrition against a threat that scales with the same mass.
       // exponent is 2, so the squared term is strength * strength.
@@ -33,7 +34,7 @@ export function conflictLanchester(params: SandboxParams): SimModule {
       const squared = Fx.mul(strength, strength);
       const scale = Fx.add(Fx.ONE, Fx.mul(strength, exponent));
       const attrition = params.get('conflict.attrition.baseline');
-      const reach = ctx.get('conflict_logistics.reach');
+      const reach = ctx.get(q('conflict_logistics.reach'));
 
       const losses = Fx.clamp(
         Fx.mul(Fx.mul(Fx.div(squared, scale), attrition), reach),
@@ -52,9 +53,10 @@ export function conflictLanchester(params: SandboxParams): SimModule {
   };
 }
 
-export function conflictLogistics(params: SandboxParams): SimModule {
+export function conflictLogistics(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'conflict_logistics',
+    id: q('conflict_logistics'),
     stateKeys: ['reach'],
 
     init(ctx) {
@@ -67,7 +69,7 @@ export function conflictLogistics(params: SandboxParams): SimModule {
       // Reach falls off with distance and recovers with capital: roads, depots.
       const penalty = params.get('conflict.logistics.range_penalty');
       const decay = Fx.mul(penalty, params.get('conflict.logistics.nominal_range_km'));
-      const capital = ctx.get('economy.capital');
+      const capital = ctx.get(q('economy.capital'));
       const support = Fx.div(capital, Fx.add(capital, params.get('conflict.logistics.support_halfsat')));
 
       const reach = Fx.clamp(

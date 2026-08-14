@@ -7,9 +7,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function cultureReplicator(params: SandboxParams): SimModule {
+export function cultureReplicator(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'culture_replicator',
+    id: q('culture_replicator'),
     stateKeys: ['sectA', 'sectB'],
 
     init(ctx) {
@@ -23,17 +24,17 @@ export function cultureReplicator(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const a = ctx.get('culture_replicator.sectA');
-      const b = ctx.get('culture_replicator.sectB');
+      const a = ctx.get(q('culture_replicator.sectA'));
+      const b = ctx.get(q('culture_replicator.sectB'));
       const strength = params.get('culture.replicator.selection_strength');
-      const churn = ctx.get('culture_transmission.churn');
+      const churn = ctx.get(q('culture_transmission.churn'));
 
       // Fitness: A rewards prosperity, B rewards legitimacy. Neither is "right";
       // they are two ways of being adaptive under different conditions.
-      const fitnessA = Fx.add(Fx.ONE, Fx.mul(ctx.get('demography.foodRatio'), strength));
+      const fitnessA = Fx.add(Fx.ONE, Fx.mul(ctx.get(q('demography.foodRatio')), strength));
       const fitnessB = Fx.add(
         Fx.ONE,
-        Fx.mul(ctx.get('politics_legitimacy.legitimacy'), strength),
+        Fx.mul(ctx.get(q('politics_legitimacy.legitimacy')), strength),
       );
 
       const mean = Fx.add(Fx.mul(a, fitnessA), Fx.mul(b, fitnessB));
@@ -54,9 +55,10 @@ export function cultureReplicator(params: SandboxParams): SimModule {
   };
 }
 
-export function cultureTransmission(params: SandboxParams): SimModule {
+export function cultureTransmission(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'culture_transmission',
+    id: q('culture_transmission'),
     stateKeys: ['churn', 'novelty'],
 
     init(ctx) {
@@ -74,7 +76,7 @@ export function cultureTransmission(params: SandboxParams): SimModule {
       // culture turns over. Horizontal transmission is what remains.
       const vertical = params.get('culture.transmission.vertical_bias');
       const horizontal = Fx.sub(Fx.ONE, vertical);
-      const contact = ctx.get('economy.urbanShare');
+      const contact = ctx.get(q('economy.urbanShare'));
       const churn = Fx.clamp(
         Fx.mul(horizontal, Fx.add(params.get('culture.transmission.base_contact'), contact)),
         params.get('culture.transmission.min_churn'),

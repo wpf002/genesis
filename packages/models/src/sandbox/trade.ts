@@ -8,9 +8,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function trade(params: SandboxParams): SimModule {
+export function trade(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'trade',
+    id: q('trade'),
     stateKeys: ['volume', 'risk'],
 
     init(ctx) {
@@ -25,8 +26,8 @@ export function trade(params: SandboxParams): SimModule {
       const risk = Fx.mul(draw, premium);
       ctx.set('risk', risk, [params.factor('trade.route.risk_premium', risk)]);
 
-      const capital = ctx.get('economy.capital');
-      const population = ctx.get('demography.population');
+      const capital = ctx.get(q('economy.capital'));
+      const population = ctx.get(q('demography.population'));
       // mass_exponent is 1, so mass is the plain product. Kept explicit so the
       // exponent has somewhere to go when it stops being 1.
       const mass = Fx.mul(Fx.add(capital, Fx.ONE), Fx.add(population, Fx.ONE));

@@ -6,12 +6,13 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function agriculture(params: SandboxParams): SimModule {
+export function agriculture(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   const TWO = Fx.fromInt(2);
   const BASE_YIELD = params.get('agriculture.yield.base');
 
   return {
-    id: 'agriculture',
+    id: q('agriculture'),
     stateKeys: ['yieldPerHectare', 'soilQuality', 'storage'],
 
     init(ctx) {
@@ -30,7 +31,7 @@ export function agriculture(params: SandboxParams): SimModule {
       // Anomaly in [-1, 1) from this module's substream.
       const anomaly = Fx.sub(Fx.mul(ctx.rng.nextUnit(), TWO), Fx.ONE);
       const sensitivity = params.get('agriculture.yield.climate_sensitivity');
-      const soil = ctx.get('agriculture.soilQuality');
+      const soil = ctx.get(q('agriculture.soilQuality'));
 
       const climateTerm = Fx.mul(sensitivity, anomaly);
       const nextYield = Fx.max(Fx.ZERO, Fx.mul(Fx.add(BASE_YIELD, climateTerm), soil));
@@ -50,7 +51,7 @@ export function agriculture(params: SandboxParams): SimModule {
         params.factor('agriculture.soil.regeneration_rate', regrowth),
       ]);
 
-      const stored = ctx.get('agriculture.storage');
+      const stored = ctx.get(q('agriculture.storage'));
       const spoiled = Fx.mul(stored, params.get('agriculture.storage.spoilage_rate'));
       ctx.set('storage', Fx.max(Fx.ZERO, Fx.add(Fx.sub(stored, spoiled), nextYield)), [
         params.factor('agriculture.storage.spoilage_rate', Fx.neg(spoiled)),

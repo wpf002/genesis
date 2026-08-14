@@ -4,9 +4,10 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function technologyDiffusion(params: SandboxParams): SimModule {
+export function technologyDiffusion(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'technology_diffusion',
+    id: q('technology_diffusion'),
     stateKeys: ['stock', 'exposure'],
 
     init(ctx) {
@@ -22,9 +23,9 @@ export function technologyDiffusion(params: SandboxParams): SimModule {
       // Contact rises with urbanisation and trade: cities and roads are how
       // ideas travel.
       const rate = params.get('technology.diffusion.contact_rate');
-      const urban = ctx.get('economy.urbanShare');
+      const urban = ctx.get(q('economy.urbanShare'));
       const cap = params.get('trade.port.throughput_cap');
-      const traffic = Fx.clamp(Fx.div(ctx.get('trade.volume'), cap), Fx.ZERO, Fx.ONE);
+      const traffic = Fx.clamp(Fx.div(ctx.get(q('trade.volume')), cap), Fx.ZERO, Fx.ONE);
 
       const exposure = Fx.clamp(Fx.mul(rate, Fx.add(urban, traffic)), Fx.ZERO, Fx.ONE);
       ctx.set('exposure', exposure, [
@@ -33,8 +34,8 @@ export function technologyDiffusion(params: SandboxParams): SimModule {
 
       // Novelty from culture adds to the stock; exposure decides how much of it
       // is retained rather than lost.
-      const stock = ctx.get('technology_diffusion.stock');
-      const gained = Fx.mul(ctx.get('culture_transmission.novelty'), exposure);
+      const stock = ctx.get(q('technology_diffusion.stock'));
+      const gained = Fx.mul(ctx.get(q('culture_transmission.novelty')), exposure);
       const forgotten = Fx.mul(stock, params.get('technology.diffusion.forgetting_rate'));
       ctx.set('stock', Fx.max(Fx.ZERO, Fx.add(Fx.sub(stock, forgotten), gained)), [
         params.factor('technology.diffusion.contact_rate', gained),
@@ -44,9 +45,10 @@ export function technologyDiffusion(params: SandboxParams): SimModule {
   };
 }
 
-export function technologyAdoption(params: SandboxParams): SimModule {
+export function technologyAdoption(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   return {
-    id: 'technology_adoption',
+    id: q('technology_adoption'),
     stateKeys: ['adopted'],
 
     init(ctx) {
@@ -59,8 +61,8 @@ export function technologyAdoption(params: SandboxParams): SimModule {
       // Logistic adoption: growth is fastest at the threshold and flattens at
       // both ends. Fixed-point, so the S-curve is built from the same logistic
       // step the rest of the model uses rather than an exponential.
-      const adopted = ctx.get('technology_adoption.adopted');
-      const stock = ctx.get('technology_diffusion.stock');
+      const adopted = ctx.get(q('technology_adoption.adopted'));
+      const stock = ctx.get(q('technology_diffusion.stock'));
       const threshold = params.get('technology.adoption.threshold');
 
       const available = Fx.clamp(Fx.div(stock, Fx.add(stock, Fx.ONE)), Fx.ZERO, Fx.ONE);

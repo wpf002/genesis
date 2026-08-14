@@ -7,12 +7,13 @@
 import { Fx, type SimModule } from '@genesis/kernel';
 import type { SandboxParams } from './resolve.js';
 
-export function demography(params: SandboxParams): SimModule {
+export function demography(params: SandboxParams, region = ''): SimModule {
+  const q = (key: string) => (region === '' ? key : `${region}:${key}`);
   const INITIAL = params.get('demography.population.initial');
   const NEED_PER_HEAD = params.get('demography.consumption.need_per_head');
 
   return {
-    id: 'demography',
+    id: q('demography'),
     stateKeys: ['population', 'foodRatio'],
 
     init(ctx) {
@@ -25,8 +26,8 @@ export function demography(params: SandboxParams): SimModule {
     },
 
     tick(ctx) {
-      const population = ctx.get('demography.population');
-      const storage = ctx.get('agriculture.storage');
+      const population = ctx.get(q('demography.population'));
+      const storage = ctx.get(q('agriculture.storage'));
 
       const need = Fx.max(Fx.parse('0.000001'), Fx.mul(population, NEED_PER_HEAD));
       const ratio = Fx.clamp(Fx.div(storage, need), Fx.ZERO, params.get('demography.consumption.max_food_ratio'));
@@ -48,8 +49,8 @@ export function demography(params: SandboxParams): SimModule {
 
       // Migration ran this tick; disease is read a tick late, which is what the
       // fixed module order buys and costs.
-      const leaving = ctx.get('migration.outflow');
-      const infectious = ctx.get('disease_seird.infectious');
+      const leaving = ctx.get(q('migration.outflow'));
+      const infectious = ctx.get(q('disease_seird.infectious'));
       const plague = Fx.mul(population, Fx.mul(infectious, params.get('demography.mortality.plague_coefficient')));
 
       const next = Fx.sub(Fx.add(Fx.sub(population, deaths), births), Fx.add(leaving, plague));

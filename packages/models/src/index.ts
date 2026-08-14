@@ -50,27 +50,38 @@ export const MODULE_ORDER: readonly string[] = [
   'technology_adoption',
 ];
 
-export function sandboxModules(params = new SandboxParams()): readonly SimModule[] {
-  const modules = [
-    agriculture(params),
-    migration(params),
-    demography(params),
-    economy(params),
-    trade(params),
-    diseaseSpatial(params),
-    diseaseSeird(params),
-    conflictLogistics(params),
-    conflictLanchester(params),
-    prices(params),
-    politicsElites(params),
-    politicsLegitimacy(params),
-    cultureTransmission(params),
-    cultureReplicator(params),
-    irrigation(params),
-    tradeRoutes(params),
-    technologyDiffusion(params),
-    technologyAdoption(params),
+/** Region ids used when a run is spatial. Order is fixed and is the map order. */
+export const REGIONS: readonly string[] = ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'];
+
+/** One region's 18 subsystems, prefixed. Empty region id gives the flat run. */
+export function regionModules(
+  params: SandboxParams,
+  region = '',
+): readonly SimModule[] {
+  return [
+    agriculture(params, region),
+    migration(params, region),
+    demography(params, region),
+    economy(params, region),
+    trade(params, region),
+    diseaseSpatial(params, region),
+    diseaseSeird(params, region),
+    conflictLogistics(params, region),
+    conflictLanchester(params, region),
+    prices(params, region),
+    politicsElites(params, region),
+    politicsLegitimacy(params, region),
+    cultureTransmission(params, region),
+    cultureReplicator(params, region),
+    irrigation(params, region),
+    tradeRoutes(params, region),
+    technologyDiffusion(params, region),
+    technologyAdoption(params, region),
   ];
+}
+
+export function sandboxModules(params = new SandboxParams()): readonly SimModule[] {
+  const modules = regionModules(params);
 
   // The declared order is the contract; this catches a module added to one list
   // and not the other rather than letting execution order drift silently.
@@ -81,4 +92,15 @@ export function sandboxModules(params = new SandboxParams()): readonly SimModule
     );
   }
   return modules;
+}
+
+/**
+ * Every region's subsystems, region by region. Execution order is regions in
+ * REGIONS order, each running its 18 in MODULE_ORDER - explicit, not derived.
+ */
+export function worldModules(
+  params = new SandboxParams(),
+  regions: readonly string[] = REGIONS,
+): readonly SimModule[] {
+  return regions.flatMap((region) => regionModules(params, region));
 }

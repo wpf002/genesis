@@ -116,3 +116,28 @@ describe('unregistered constants', () => {
     expect(count).toBeLessThanOrEqual(BUDGET);
   });
 });
+
+describe('multi-region runs', () => {
+  it('gives every region its own 18 subsystems', async () => {
+    const { REGIONS, worldModules } = await import('./index.js');
+    expect(worldModules().length).toBe(REGIONS.length * MODULE_ORDER.length);
+  });
+
+  it('keeps regions independent: same modules, different draws', async () => {
+    const { REGIONS, worldModules } = await import('./index.js');
+    const run = new Run({ seed: SEED, modules: worldModules() });
+    run.advanceTo(200);
+    const pops = REGIONS.map((r) => Fx.toString(run.get(`${r}:demography.population`)));
+    expect(new Set(pops).size).toBe(REGIONS.length);
+  });
+
+  it('is deterministic across the whole world', async () => {
+    const { worldModules } = await import('./index.js');
+    const hash = () => {
+      const r = new Run({ seed: SEED, modules: worldModules() });
+      r.advanceTo(200);
+      return r.stateHash();
+    };
+    expect(hash()).toBe(hash());
+  });
+});
