@@ -1,6 +1,6 @@
 {
   "dataset": "HYDE 3.5 (popc base/lower/upper) + PAGES2k asia2k & EuroMed2k",
-  "generated": "2026-08-13",
+  "generated": "2026-08-14",
   "mode": "REAL",
   "model": "population-yield-climate, century steps, 800-1500 CE",
   "verdicts": [

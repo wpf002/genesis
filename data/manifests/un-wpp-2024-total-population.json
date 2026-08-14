@@ -1,0 +1,24 @@
+{
+  "file": "wpp/WPP2024_TotalPopulationBySex.csv.gz",
+  "is_reconstruction": true,
+  "layer": "PROJECTION",
+  "license": "CC BY 3.0 IGO",
+  "name": "un-wpp-2024-total-population",
+  "notes": null,
+  "retrieved": "2026-08-14",
+  "sha256": "66b84489fd7875b62de9b40d960b803b8c8439367c98deab89c2f770970925b9",
+  "source_url": "https://population.un.org/wpp/",
+  "variables": [
+    {
+      "description": "UN World Population Prospects 2024: estimates 1950-2023, projections to 2100",
+      "name": "population",
+      "uncertainty": {
+        "kind": "ensemble",
+        "note": "Projections ship as variants (low/medium/high/constant). A variant is a scenario, not a probability, and carries no coverage.",
+        "value": null
+      },
+      "unit": "thousands"
+    }
+  ],
+  "version": "as retrieved"
+}

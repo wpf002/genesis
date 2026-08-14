@@ -1,0 +1,24 @@
+{
+  "file": "ucdp/ged251-csv.zip",
+  "is_reconstruction": false,
+  "layer": "SANDBOX",
+  "license": "CC BY 4.0",
+  "name": "ucdp-ged-25.1",
+  "notes": null,
+  "retrieved": "2026-08-14",
+  "sha256": "e256f1fb20a579d8b2f910e5bae212f486d3002adaa2e4359ace740c737da05d",
+  "source_url": "https://ucdp.uu.se/downloads/",
+  "variables": [
+    {
+      "description": "UCDP Georeferenced Event Dataset, organized violence 1989 onward",
+      "name": "conflict_event",
+      "uncertainty": {
+        "kind": "unstated",
+        "note": "Coded from reports. Date and location precision are carried per event in the date_prec and where_prec fields; fatality counts have low/best/high estimates but no distribution.",
+        "value": null
+      },
+      "unit": "events"
+    }
+  ],
+  "version": "as retrieved"
+}

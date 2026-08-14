@@ -1,0 +1,24 @@
+{
+  "file": "icecore/edc3deuttemp2007.txt",
+  "is_reconstruction": true,
+  "layer": "SANDBOX",
+  "license": "NOAA/WDS Paleoclimatology \u2014 public domain, cite the study",
+  "name": "epica-dome-c-edc3",
+  "notes": null,
+  "retrieved": "2026-08-14",
+  "sha256": "b801fc2e422d427524619be25b50ee86fd63b36eb440eb5044d9bec12a4d1747",
+  "source_url": "https://www.ncei.noaa.gov/pub/data/paleo/icecore/antarctica/epica_domec/",
+  "variables": [
+    {
+      "description": "EPICA Dome C deuterium temperature reconstruction, 800 kyr",
+      "name": "temperature_anomaly",
+      "uncertainty": {
+        "kind": "unstated",
+        "note": "Deuterium-derived temperature. The published record carries no per-point error column; age-scale and calibration uncertainty are discussed in the source publication only.",
+        "value": null
+      },
+      "unit": "degC"
+    }
+  ],
+  "version": "as retrieved"
+}

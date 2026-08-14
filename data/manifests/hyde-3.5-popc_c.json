@@ -1,6 +1,7 @@
 {
   "file": "hyde35/popc_c.txt",
   "is_reconstruction": true,
+  "layer": "RIGOR",
   "license": "CC BY-NC 4.0 (License.txt) / CC BY 3.0 (readme_HYDE_3.5.txt) \u2014 sources disagree",
   "name": "hyde-3.5-popc_c",
   "notes": null,

@@ -93,3 +93,26 @@ def test_ensemble_uncertainty_requires_a_note_not_a_fake_coverage() -> None:
 
     with pytest.raises(ValidationError):
         Uncertainty(kind="relative")
+
+
+def test_unstated_uncertainty_is_a_real_category_not_a_hedge() -> None:
+    from genesis_calibrate.datasets.manifest import Uncertainty
+
+    # A reconstruction whose authors publish no error estimate must be sayable
+    # without inventing a number.
+    u = Uncertainty(kind="unstated", note="Maddison publishes no error estimate")
+    assert u.value is None
+    with pytest.raises(ValidationError):
+        Uncertainty(kind="unstated")
+
+
+def test_manifests_declare_a_layer_and_rigor_inputs_are_separable() -> None:
+    from genesis_calibrate.datasets.sources import all_manifests
+
+    layers = {m.name: m.layer for m in all_manifests()}
+    rigor = [n for n, layer in layers.items() if layer == "RIGOR"]
+    assert all(n.startswith(("hyde-", "pages2k-")) for n in rigor)
+    # Sandbox data must never be a Rigor input.
+    assert "maddison-2020" in layers
+    assert layers["maddison-2020"] == "SANDBOX"
+    assert layers["un-wpp-2024-total-population"] == "PROJECTION"

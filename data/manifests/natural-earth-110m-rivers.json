@@ -1,0 +1,20 @@
+{
+  "file": "geography/ne_110m_rivers_lake_centerlines.geojson",
+  "is_reconstruction": false,
+  "layer": "SANDBOX",
+  "license": "public domain",
+  "name": "natural-earth-110m-rivers",
+  "notes": null,
+  "retrieved": "2026-08-14",
+  "sha256": "55aa4497405afc07cdc931b7fbe062c4d6693ba2a550c0d24899953f5d507c8d",
+  "source_url": "https://www.naturalearthdata.com/",
+  "variables": [
+    {
+      "description": "Natural Earth 110m river and lake centerlines",
+      "name": "river",
+      "uncertainty": null,
+      "unit": "geojson"
+    }
+  ],
+  "version": "as retrieved"
+}

@@ -21,12 +21,22 @@ from .pipeline import run_identifiability
 
 
 def verify_inputs(root: Path, manifests: Path) -> int:
+    """Verifies only the RIGOR-layer inputs.
+
+    Sandbox and Projection datasets live alongside these but must never gate a
+    Rigor run, and a missing Sandbox file must never break one (ADR 0004).
+    """
     checked = 0
     for path in sorted(manifests.glob("*.json")):
-        verify(load_manifest(path), root)
+        manifest = load_manifest(path)
+        if manifest.layer != "RIGOR":
+            continue
+        verify(manifest, root)
         checked += 1
     if checked == 0:
-        raise RuntimeError(f"no manifests in {manifests}; run datasets.sources refresh")
+        raise RuntimeError(
+            f"no RIGOR-layer manifests in {manifests}; run datasets.sources refresh"
+        )
     return checked
 
 

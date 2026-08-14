@@ -1,0 +1,24 @@
+{
+  "file": "maddison/mpd2020.xlsx",
+  "is_reconstruction": true,
+  "layer": "SANDBOX",
+  "license": "CC BY 4.0",
+  "name": "maddison-2020",
+  "notes": null,
+  "retrieved": "2026-08-14",
+  "sha256": "d20853c2e0930d6855fb6d8138da11f24fcf313d234e2db9773ea1f551adfec3",
+  "source_url": "https://www.rug.nl/ggdc/historicaldevelopment/maddison/",
+  "variables": [
+    {
+      "description": "Maddison Project Database 2020, GDP per capita, 1 CE onward",
+      "name": "gdp_per_capita",
+      "uncertainty": {
+        "kind": "unstated",
+        "note": "No error estimate is published. Pre-1800 figures are reconstructions from fragmentary evidence and are actively contested in the literature. Do not weight a likelihood by them without supplying an uncertainty from somewhere else.",
+        "value": null
+      },
+      "unit": "1990_int_dollars"
+    }
+  ],
+  "version": "as retrieved"
+}

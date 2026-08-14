@@ -1,6 +1,7 @@
 {
   "file": "pages2k/asia2k-jja-temp-anom.txt",
   "is_reconstruction": true,
+  "layer": "RIGOR",
   "license": "NOAA/WDS Paleoclimatology \u2014 public domain, cite the study",
   "name": "pages2k-asia2k-jja-temp-anom",
   "notes": null,

@@ -16,7 +16,16 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-UncertaintyKind = Literal["absolute", "relative", "interval", "ensemble"]
+#: `unstated` is not a hedge. It is the honest label for a reconstruction whose
+#: authors publish no error estimate at all — Maddison's pre-1800 GDP figures,
+#: for instance. Recording it as `relative: 0.2` would be inventing a number, and
+#: inventing numbers is the thing this project exists to prevent.
+UncertaintyKind = Literal["absolute", "relative", "interval", "ensemble", "unstated"]
+
+#: Which layer of ADR 0004 a dataset may feed. A SANDBOX dataset must never
+#: reach a Rigor output, and the Rigor run verifies only its own inputs so a
+#: missing Sandbox file cannot break it.
+Layer = Literal["RIGOR", "SANDBOX", "PROJECTION"]
 
 
 class Uncertainty(BaseModel):
@@ -30,9 +39,9 @@ class Uncertainty(BaseModel):
 
     @model_validator(mode="after")
     def value_or_note(self) -> Uncertainty:
-        if self.kind == "ensemble":
+        if self.kind in ("ensemble", "unstated"):
             if self.note is None:
-                raise ValueError("ensemble uncertainty must explain the envelope in a note")
+                raise ValueError(f"{self.kind} uncertainty must be explained in a note")
             return self
         if self.value is None:
             raise ValueError(f"{self.kind} uncertainty requires a value")
@@ -57,6 +66,7 @@ class DatasetManifest(BaseModel):
     file: str
     variables: list[Variable]
     is_reconstruction: bool
+    layer: Layer = "SANDBOX"
     notes: str | None = None
 
     @model_validator(mode="after")
