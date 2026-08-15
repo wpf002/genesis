@@ -117,6 +117,25 @@ export class Run {
     return this.store.get(key);
   }
 
+  /**
+   * Sets a state value outside a module's tick, for a declared counterfactual
+   * intervention. The write is recorded in the ledger like any other, so a
+   * branch can be told apart from drift.
+   */
+  override(key: string, value: Fixed, factor: Factor): void {
+    const previous = this.store.get(key);
+    this.store.set(key, value);
+    this.ledger.record({
+      tick: this.currentTick,
+      moduleId: 'intervention',
+      stateKey: key,
+      previous,
+      next: value,
+      factors: [factor],
+      reads: [],
+    });
+  }
+
   /** BLAKE3 over the canonical state encoding. RNG state is not included. */
   stateHash(): string {
     return blake3Hex(encodeState(this.currentTick, this.store.entries()));

@@ -60,3 +60,13 @@ export function exportRun(input: ExportInput): string {
 export function isWatermarked(text: string): boolean {
   return SANDBOX_WATERMARK.every((line) => text.includes(line));
 }
+
+export {
+  branch,
+  NarrativeClaimRefused,
+  rigorInterval,
+  type BranchRequest,
+  type BranchResult,
+  type Intervention,
+  type Interval,
+} from './branch.js';
