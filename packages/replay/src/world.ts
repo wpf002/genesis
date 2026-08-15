@@ -13,17 +13,17 @@
 
 import { Fx, Run, type RunOptions } from '@genesis/kernel';
 import { yearOf } from './chronicle.js';
+import { DIMENSION_KEYS } from './analysis/dimensions.js';
 
-/** The values a world view is built from. Everything else is left in the run. */
-export const SAMPLED_KEYS = [
-  'demography.population',
-  'demography.foodRatio',
-  'disease_seird.infectious',
-  'politics_legitimacy.legitimacy',
-  'technology_adoption.adopted',
-] as const;
+/**
+ * The values a world view is built from. Everything else is left in the run.
+ *
+ * One list, shared with Reality DNA, Reality Distance and the first-difference
+ * search, so those cannot disagree about what a world is made of.
+ */
+export const SAMPLED_KEYS = DIMENSION_KEYS;
 
-export type SampledKey = (typeof SAMPLED_KEYS)[number];
+export type SampledKey = string;
 
 /** stateKey -> tick-aligned values. Index i is `ticks[i]` for every key. */
 export interface SampleTable {

@@ -11,6 +11,20 @@
 // would introduce a value the fixed-point scale cannot represent.
 
 export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
+  // reality distance weights
+  'distance.weight.population': '1',
+  'distance.weight.food': '0.9',
+  'distance.weight.agriculture': '0.7',
+  'distance.weight.economy': '0.6',
+  'distance.weight.trade': '0.6',
+  'distance.weight.prices': '0.25',
+  'distance.weight.disease': '0.5',
+  'distance.weight.migration': '0.4',
+  'distance.weight.conflict': '0.3',
+  'distance.weight.politics': '0.7',
+  'distance.weight.culture': '0.15',
+  'distance.weight.technology': '0.8',
+
   // agriculture
   'agriculture.yield.tfp_exponent': '0.3',
   'agriculture.yield.climate_sensitivity': '0.1',

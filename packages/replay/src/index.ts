@@ -161,3 +161,60 @@ export {
   type Finding,
   type Stage,
 } from './catalogue/expansion.js';
+
+export {
+  DIMENSIONS,
+  DIMENSION_KEYS,
+  SUBSYSTEMS,
+  dimensionOf,
+  type Dimension,
+} from './analysis/dimensions.js';
+export {
+  DISTANCE_METHOD,
+  realityDistance,
+  weightTable,
+  type DistancePoint,
+  type WeightRow,
+} from './analysis/distance.js';
+export {
+  cascades,
+  convergence,
+  firstDifference,
+  ripple,
+  spread,
+  type CascadeEvent,
+  type Convergence,
+  type FirstDifference,
+  type RegionArrival,
+  type Ripple,
+  type RippleRing,
+} from './analysis/difference.js';
+export {
+  DNA_NOT_MODELLED,
+  realityDna,
+  type DnaAxis,
+  type RealityDna,
+} from './analysis/dna.js';
+export {
+  EVIDENCE,
+  EVIDENCE_ORDER,
+  NOT_A_PROBABILITY,
+  REPRESENTABILITY,
+  SUPPORT,
+  type EvidenceClass,
+  type Representability,
+  type Support,
+} from './analysis/evidence.js';
+export {
+  FIT_CAVEAT,
+  HISTORICAL_EVENTS,
+  SOURCES,
+  WORLD_POPULATION,
+  eventsNear,
+  modelAgainstRecord,
+  sourceOf,
+  type FitPoint,
+  type HistoricalEvent,
+  type Observation,
+  type Source,
+} from './history/observations.js';

@@ -15,6 +15,7 @@ import { Fx, Run, type RunOptions } from '@genesis/kernel';
 import { SandboxParams, worldModules, ALL_REGIONS } from '@genesis/models';
 import { START_YEAR } from '../chronicle.js';
 import { sampleWorld, type SampleTable } from '../world.js';
+import { DIMENSION_KEYS } from '../analysis/dimensions.js';
 import type { CatalogueEntry } from './entries.js';
 
 /** 3000 BC to AD 2100. */
@@ -150,10 +151,4 @@ export function runBaseline(
   };
 }
 
-const SAMPLE_KEYS = [
-  'demography.population',
-  'demography.foodRatio',
-  'disease_seird.infectious',
-  'politics_legitimacy.legitimacy',
-  'technology_adoption.adopted',
-] as const;
+const SAMPLE_KEYS = DIMENSION_KEYS;

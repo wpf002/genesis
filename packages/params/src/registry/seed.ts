@@ -11,6 +11,23 @@
 import type { ParamDecl } from './registry.js';
 
 export const SANDBOX_PARAMS: readonly ParamDecl[] = [
+  // --- reality distance --------------------------------------------------
+  // The weights behind the Reality Distance index. They are registered rather
+  // than hardcoded so the provenance gate can see them: the index is a
+  // comparison of two model runs, and every number in it is INVENTED.
+  { key: 'distance.weight.population', unit: 'dimensionless', provenance: 'INVENTED', note: 'Population is weighted highest because it is the dimension every other subsystem eventually feeds. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.food', unit: 'dimensionless', provenance: 'INVENTED', note: 'Food security drives the demographic response, so it leads the others. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.agriculture', unit: 'dimensionless', provenance: 'INVENTED', note: 'Stored food and soil are the carrying-capacity terms. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.economy', unit: 'dimensionless', provenance: 'INVENTED', note: 'Surplus is what funds everything discretionary. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.trade', unit: 'dimensionless', provenance: 'INVENTED', note: 'Trade moves food and disease between regions. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.prices', unit: 'dimensionless', provenance: 'INVENTED', note: 'Prices are a symptom more than a driver, so they are weighted low. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.disease', unit: 'dimensionless', provenance: 'INVENTED', note: 'Disease burden is dramatic in the timeline and reverts, so it is weighted below food. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.migration', unit: 'dimensionless', provenance: 'INVENTED', note: 'Migration is the visible edge of food pressure. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.conflict', unit: 'dimensionless', provenance: 'INVENTED', note: 'Military capability is weighted low: the model has no territory for it to take. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.politics', unit: 'dimensionless', provenance: 'INVENTED', note: 'Legitimacy and fragmentation gate infrastructure and trade. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.culture', unit: 'dimensionless', provenance: 'INVENTED', note: 'Culture feeds nothing else in the model yet, so it is weighted lowest. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+  { key: 'distance.weight.technology', unit: 'dimensionless', provenance: 'INVENTED', note: 'Technology multiplies yield, so it is weighted with the carrying-capacity terms. Chosen by hand for the Reality Distance index; nothing fitted it.', bounds: { min: '0', max: '1' } },
+
   // --- agriculture -------------------------------------------------------
   { key: 'agriculture.yield.tfp_exponent', unit: 'dimensionless', provenance: 'INVENTED', note: 'Cobb-Douglas exponent picked so yield responds visibly but does not run away.', bounds: { min: '0.1', max: '0.9' } },
   { key: 'agriculture.yield.climate_sensitivity', unit: 'tonnes_per_hectare_per_degree', provenance: 'INVENTED', note: 'Scaled so a 1C anomaly moves yield by roughly a tenth.' },
