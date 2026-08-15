@@ -9,28 +9,36 @@
 // A pack is just a Scenario, so anything here can be edited into a permalink and
 // sent on.
 
+import { ALL_REGIONS } from '@genesis/models';
 import { parseScenario, SCENARIO_FORMAT, type Scenario } from './scenario.js';
+
+/**
+ * 3000 BC to AD 2100. Everything past AD 2025 is the model running forward with
+ * nothing to check it against, and the interface says so.
+ */
+const FULL_SPAN = 5100;
+const WORLD = ALL_REGIONS;
 
 const packs: readonly unknown[] = [
   {
     format: SCENARIO_FORMAT,
     id: 'all-of-it',
     title: 'All of it',
-    note: 'Six regions, one year per tick, 3000 BC to the present. Nothing touched — this is the run every other timeline is measured against.',
+    note: 'Every country on the map, one year per tick, 3000 BC to AD 2100. Nothing touched — this is the run every other timeline is measured against. The last seventy-five years are forecast.',
     mode: 'SANDBOX',
     seed: '1',
-    ticks: 5000,
-    regions: ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'],
+    ticks: FULL_SPAN,
+    regions: WORLD,
   },
   {
     format: SCENARIO_FORMAT,
     id: 'no-plague',
     title: 'The plague never comes',
-    note: 'Same five thousand years, with disease transmission cut to a tenth. The question this answers is what the dying was holding down.',
+    note: 'The same five thousand years worldwide, with disease transmission cut to a tenth. The question it answers is what the dying was holding down.',
     mode: 'SANDBOX',
     seed: '1',
-    ticks: 5000,
-    regions: ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'],
+    ticks: FULL_SPAN,
+    regions: WORLD,
     overrides: {
       'disease.seird.beta_baseline': '0.035',
       'disease.spatial.coupling_strength': '0.005',

@@ -162,6 +162,15 @@ export function configHash(scenario: Scenario): string {
   return blake3Hex(new TextEncoder().encode(canonicalConfig(scenario)));
 }
 
+/**
+ * Ticks x regions: what a run costs to execute. A full-world run over all of
+ * history is about 900,000, which is fine on a machine somebody is sitting at
+ * and not fine inside a public endpoint or a unit test.
+ */
+export function workUnits(scenario: Scenario): number {
+  return scenario.ticks * Math.max(1, scenario.regions.length);
+}
+
 export interface ScenarioRun {
   readonly scenario: Scenario;
   readonly configHash: string;

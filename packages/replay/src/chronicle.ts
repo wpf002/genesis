@@ -16,7 +16,7 @@
 // into its own top five percent. It is a label on a number, put there so a run
 // can be read at a glance instead of squinted at on five axes.
 
-import { Fx, type Run } from '@genesis/kernel';
+import type { SampleTable } from './world.js';
 
 /** Tick 0. Cities, writing and states are leaving evidence by roughly here. */
 export const START_YEAR = -3000;
@@ -78,31 +78,12 @@ interface Band {
   readonly high: number;
 }
 
-/** Reads the ledger once. Everything else here works off this index. */
-function indexRun(run: Run): {
-  series: Map<string, Map<number, number>>;
-  lastTick: number;
-} {
-  const series = new Map<string, Map<number, number>>();
-  let lastTick = 0;
-  for (const entry of run.ledger.all()) {
-    const perKey = series.get(entry.stateKey) ?? new Map<number, number>();
-    perKey.set(entry.tick, Number(Fx.toString(entry.next)));
-    series.set(entry.stateKey, perKey);
-    if (entry.tick > lastTick) lastTick = entry.tick;
-  }
-  return { series, lastTick };
-}
-
-function bandsFor(
-  series: Map<string, Map<number, number>>,
-  region: string,
-): Map<string, Band> {
+function bandsFor(table: SampleTable, region: string): Map<string, Band> {
   const bands = new Map<string, Band>();
   for (const key of TRACKED) {
-    const values = series.get(qualify(region, key));
+    const values = table.values.get(qualify(region, key));
     if (values === undefined) continue;
-    const sorted = [...values.values()].sort((a, b) => a - b);
+    const sorted = [...values].sort((a, b) => a - b);
     bands.set(key, { low: percentile(sorted, 0.05), high: percentile(sorted, 0.95) });
   }
   return bands;
@@ -140,54 +121,41 @@ function classify(
  * One frame per sampled tick: every region's condition at that moment. This is
  * what a map animates over.
  */
-export function conditionFrames(
-  run: Run,
-  regions: readonly string[],
-  points = 200,
-): readonly Frame[] {
-  const { series, lastTick } = indexRun(run);
-  const bands = new Map(regions.map((region) => [region, bandsFor(series, region)]));
+export function conditionFrames(table: SampleTable, points = 200): readonly Frame[] {
+  const regions = table.regions;
+  const bands = new Map(regions.map((region) => [region, bandsFor(table, region)]));
 
-  const read = (region: string, key: string, tick: number): number => {
-    const values = series.get(qualify(region, key));
-    if (values === undefined) return 0;
-    // Carry the last known value forward rather than dropping to zero.
-    for (let t = tick; t >= 0; t -= 1) {
-      const value = values.get(t);
-      if (value !== undefined) return value;
-    }
-    return 0;
-  };
+  const at = (region: string, key: string, index: number): number =>
+    table.values.get(qualify(region, key))?.[index] ?? 0;
 
-  const readFrame = (tick: number): Frame => ({
-    tick,
-    year: yearOf(tick),
-    regions: regions.map((region) => {
-      const population = read(region, 'demography.population', tick);
-      const foodRatio = read(region, 'demography.foodRatio', tick);
-      const infectious = read(region, 'disease_seird.infectious', tick);
-      const legitimacy = read(region, 'politics_legitimacy.legitimacy', tick);
-      return {
-        region,
-        population,
-        foodRatio,
-        infectious,
-        legitimacy,
-        state: classify(
+  const readFrame = (index: number): Frame => {
+    const tick = table.ticks[index] ?? 0;
+    return {
+      tick,
+      year: yearOf(tick),
+      regions: regions.map((region) => {
+        const population = at(region, 'demography.population', index);
+        const foodRatio = at(region, 'demography.foodRatio', index);
+        const infectious = at(region, 'disease_seird.infectious', index);
+        const legitimacy = at(region, 'politics_legitimacy.legitimacy', index);
+        return {
+          region,
+          population,
           foodRatio,
           infectious,
           legitimacy,
-          bands.get(region) ?? new Map(),
-        ),
-      };
-    }),
-  });
+          state: classify(foodRatio, infectious, legitimacy, bands.get(region) ?? new Map()),
+        };
+      }),
+    };
+  };
 
-  const stride = Math.max(1, Math.ceil(lastTick / points));
+  const stride = Math.max(1, Math.ceil(table.ticks.length / points));
   const frames: Frame[] = [];
-  for (let tick = 1; tick <= lastTick; tick += stride) frames.push(readFrame(tick));
-  if (lastTick > 0 && frames[frames.length - 1]?.tick !== lastTick) {
-    frames.push(readFrame(lastTick));
+  for (let i = 0; i < table.ticks.length; i += stride) frames.push(readFrame(i));
+  const lastIndex = table.ticks.length - 1;
+  if (lastIndex >= 0 && frames[frames.length - 1]?.tick !== table.ticks[lastIndex]) {
+    frames.push(readFrame(lastIndex));
   }
   return frames;
 }
@@ -247,18 +215,14 @@ const COLLAPSE_FRACTION = 0.7;
  * Reads the ledger and names what happened, sorted by tick, so the list reads as
  * a chronicle rather than as a query result.
  */
-export function chronicle(
-  run: Run,
-  regions: readonly string[] = [''],
-): readonly WorldEvent[] {
-  const { series } = indexRun(run);
+export function chronicle(table: SampleTable): readonly WorldEvent[] {
   const events: WorldEvent[] = [];
 
-  for (const region of regions) {
-    const bands = bandsFor(series, region);
+  for (const region of table.regions) {
+    const bands = bandsFor(table, region);
 
     for (const rule of RULES) {
-      const values = series.get(qualify(region, rule.key));
+      const values = table.values.get(qualify(region, rule.key));
       const band = bands.get(rule.key);
       if (values === undefined || band === undefined) continue;
 
@@ -268,8 +232,9 @@ export function chronicle(
 
       let previous: number | undefined;
       let mutedUntil = -1;
-      for (const tick of [...values.keys()].sort((a, b) => a - b)) {
-        const value = values.get(tick) as number;
+      for (let i = 0; i < values.length; i += 1) {
+        const tick = table.ticks[i] as number;
+        const value = values[i] as number;
         if (previous !== undefined && tick > mutedUntil) {
           const crossed =
             rule.edge === 'high'
@@ -293,11 +258,12 @@ export function chronicle(
 
     // Technology adoption is a genuine S-curve, so the halfway point is a real
     // moment rather than a percentile of noise.
-    const adopted = series.get(qualify(region, 'technology_adoption.adopted'));
+    const adopted = table.values.get(qualify(region, 'technology_adoption.adopted'));
     if (adopted !== undefined) {
       let previous: number | undefined;
-      for (const tick of [...adopted.keys()].sort((a, b) => a - b)) {
-        const value = adopted.get(tick) as number;
+      for (let i = 0; i < adopted.length; i += 1) {
+        const tick = table.ticks[i] as number;
+        const value = adopted[i] as number;
         if (previous !== undefined && previous <= 0.5 && value > 0.5) {
           events.push({
             tick,
@@ -313,13 +279,14 @@ export function chronicle(
       }
     }
 
-    const population = series.get(qualify(region, 'demography.population'));
+    const population = table.values.get(qualify(region, 'demography.population'));
     if (population !== undefined) {
       let peak = 0;
       let mutedUntil = -1;
       let down = false;
-      for (const tick of [...population.keys()].sort((a, b) => a - b)) {
-        const value = population.get(tick) as number;
+      for (let i = 0; i < population.length; i += 1) {
+        const tick = table.ticks[i] as number;
+        const value = population[i] as number;
         if (value > peak) peak = value;
         const collapsed = peak > 0 && value < peak * COLLAPSE_FRACTION;
         if (collapsed && !down && tick > mutedUntil) {

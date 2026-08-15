@@ -11,6 +11,7 @@
  */
 
 import type { SimModule } from '@genesis/kernel';
+import { ALL_REGIONS } from './regions.js';
 import { agriculture } from './sandbox/agriculture.js';
 import { conflictLanchester, conflictLogistics } from './sandbox/conflict.js';
 import { cultureReplicator, cultureTransmission } from './sandbox/culture.js';
@@ -50,8 +51,13 @@ export const MODULE_ORDER: readonly string[] = [
   'technology_adoption',
 ];
 
-/** Region ids used when a run is spatial. Order is fixed and is the map order. */
-export const REGIONS: readonly string[] = ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'];
+export { ALL_REGIONS, REGION_TABLE, type RegionInfo } from './regions.js';
+
+/**
+ * Every country in Natural Earth 110m. A run may use all of them or a subset;
+ * order is the array's order and it is the map order too.
+ */
+export const REGIONS: readonly string[] = ALL_REGIONS;
 
 /** One region's 18 subsystems, prefixed. Empty region id gives the flat run. */
 export function regionModules(

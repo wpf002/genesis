@@ -31,7 +31,7 @@ export default function Home() {
             differently.
           </h1>
           <p className="mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-ink-secondary">
-            Genesis runs six civilizations from 3000 BC to the present — farming,
+            Genesis runs every country on the map from 3000 BC to AD 2100 — farming,
             plague, trade, war, dynasties, ideas. Move one number and the next five
             thousand years take a different course. Both timelines run side by side so
             you can see exactly what your change cost.
@@ -59,9 +59,9 @@ export default function Home() {
           <div>
             <h3 className="text-sm font-semibold text-ink">Run the whole span</h3>
             <p className="mt-3 text-sm leading-relaxed text-ink-secondary">
-              Egypt, China, Italy, India, France and Turkey, one year per tick, from
-              3000 BC forward. Eighteen systems per region, all of them feeding each
-              other.
+              177 countries, one year per tick, 3000 BC to AD 2100. Eighteen systems
+              each, all of them feeding each other, and the last seventy-five years are
+              the model running ahead of the record.
             </p>
           </div>
           <div>
@@ -81,17 +81,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-rule">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <p className="max-w-3xl text-sm leading-relaxed text-ink-muted">
-            Everything here is a simulation, not a finding. The numbers behind it were
-            chosen because they make the model behave — none of them are fitted to the
-            historical record, and Genesis will not pretend otherwise. There is a second
-            mode for claims that have to survive scrutiny, and it currently ships with
-            nothing in it, because the two things tested for it both failed.
-          </p>
-        </div>
-      </section>
     </main>
   );
 }

@@ -7,6 +7,7 @@ import {
   baselineOf,
   chronicle,
   conditionFrames,
+  tableFromRun,
   formatYear,
   canonicalConfig,
   configHash,
@@ -24,6 +25,7 @@ import {
   SCENARIO_PACKS,
   ScenarioInvalid,
   verifyPermalink,
+  workUnits,
   type Scenario,
 } from './index.js';
 
@@ -248,13 +250,30 @@ describe('the Phase 8 exit gate', () => {
   });
 });
 
+// The two full-world packs are ~900,000 tick-regions each and take about half a
+// minute to execute. Tests that must run every pack run the affordable ones and
+// name the ones they did not, because a silent cap reads as full coverage.
+const AFFORDABLE = 200_000;
+const affordable = SCENARIO_PACKS.filter((p) => workUnits(p) <= AFFORDABLE);
+const expensive = SCENARIO_PACKS.filter((p) => workUnits(p) > AFFORDABLE);
+
 describe('scenario packs', () => {
+  it('says which packs are too expensive to execute in a unit test', () => {
+    // Not a skip: this asserts the split is what it is supposed to be, so a pack
+    // silently becoming unaffordable shows up here.
+    expect(expensive.map((p) => p.id)).toEqual(['all-of-it', 'no-plague']);
+    expect(affordable.length).toBe(SCENARIO_PACKS.length - expensive.length);
+  });
+
+  it('round-trips the expensive packs through a permalink without running them', () => {
+    for (const pack of expensive) {
+      expect(decodePermalink(encodePermalink(pack))).toEqual(pack);
+    }
+  });
   it('ships ten of them, all Sandbox and all watermark-required', () => {
     expect(SCENARIO_PACKS).toHaveLength(10);
-    for (const pack of SCENARIO_PACKS) {
-      expect(pack.mode).toBe('SANDBOX');
-      expect(publish(pack).watermarkRequired).toBe(true);
-    }
+    for (const pack of SCENARIO_PACKS) expect(pack.mode).toBe('SANDBOX');
+    for (const pack of affordable) expect(publish(pack).watermarkRequired).toBe(true);
   });
 
   it('has unique ids', () => {
@@ -262,7 +281,7 @@ describe('scenario packs', () => {
   });
 
   it('every pack reproduces from its own permalink', () => {
-    for (const pack of SCENARIO_PACKS) {
+    for (const pack of affordable) {
       const published = publish(pack);
       expect(reproduce(published.token).terminalHash).toBe(published.terminalHash);
     }
@@ -272,7 +291,7 @@ describe('scenario packs', () => {
   // disease_spatial.importPressure, which disease_spatial recomputes from scratch
   // before any reader sees it, so the pack ran and returned the baseline hash.
   it('every pack that touches something actually changes the run', () => {
-    for (const pack of SCENARIO_PACKS) {
+    for (const pack of affordable) {
       const touches =
         Object.keys(pack.overrides).length > 0 || pack.interventions.length > 0;
       if (!touches) continue;
@@ -286,7 +305,7 @@ describe('scenario packs', () => {
 
   it('no two packs are the same run wearing different names', () => {
     const seen = new Map<string, string>();
-    for (const pack of SCENARIO_PACKS) {
+    for (const pack of affordable) {
       const hash = publish(pack).terminalHash;
       expect(seen.has(hash), `${pack.id} and ${seen.get(hash)} are the same run`).toBe(false);
       seen.set(hash, pack.id);
@@ -334,11 +353,18 @@ describe('scenario packs', () => {
     // distribution, so a world with almost no disease still had a top five
     // percent, and "the plague never comes" reported MORE plagues than the
     // baseline. Disease burden is a share of the population, not a rank.
-    const withPlague = packById('all-of-it') as Scenario;
-    const without = packById('no-plague') as Scenario;
+    const withPlague = packById('six-regions') as Scenario;
+    const without = parseScenario({
+      ...(packById('six-regions') as Scenario),
+      id: 'six-regions-no-plague',
+      overrides: {
+        'disease.seird.beta_baseline': '0.035',
+        'disease.spatial.coupling_strength': '0.005',
+      },
+    });
 
     const plagues = (pack: Scenario) =>
-      chronicle(runScenario(pack).run, pack.regions).filter(
+      chronicle(tableFromRun(runScenario(pack).run, pack.regions)).filter(
         (event) => event.headline === 'Plague spreads',
       ).length;
 
@@ -347,8 +373,8 @@ describe('scenario packs', () => {
   });
 
   it('paints a map that is mostly quiet, so a flash of colour means something', () => {
-    const pack = packById('all-of-it') as Scenario;
-    const frames = conditionFrames(runScenario(pack).run, pack.regions);
+    const pack = packById('six-regions') as Scenario;
+    const frames = conditionFrames(tableFromRun(runScenario(pack).run, pack.regions));
     const cells = frames.flatMap((frame) => frame.regions);
     const steady = cells.filter((c) => c.state === 'steady').length / cells.length;
 
@@ -360,10 +386,10 @@ describe('scenario packs', () => {
   });
 
   it('starts the clock in 3000 BC and reaches the present', () => {
-    const pack = packById('all-of-it') as Scenario;
-    const frames = conditionFrames(runScenario(pack).run, pack.regions);
+    const pack = packById('six-regions') as Scenario;
+    const frames = conditionFrames(tableFromRun(runScenario(pack).run, pack.regions));
     expect(formatYear(frames[0]?.year ?? 0)).toMatch(/BC$/);
-    expect(frames[frames.length - 1]?.year).toBe(2000);
+    expect(frames[frames.length - 1]?.year).toBe(-3000 + pack.ticks);
     expect(formatYear(2000)).toBe('AD 2000');
   });
 

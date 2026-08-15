@@ -84,6 +84,7 @@ export {
   SCENARIO_FORMAT,
   ScenarioInvalid,
   scenarioSchema,
+  workUnits,
   type Scenario,
   type ScenarioIntervention,
   type ScenarioRun,
@@ -125,3 +126,14 @@ export {
   type Sample,
   type Series,
 } from './series.js';
+
+export {
+  SAMPLED_KEYS,
+  sampleWorld,
+  tableFromRun,
+  yearsOf,
+  type SampledKey,
+  type SampledRun,
+  type SampleRequest,
+  type SampleTable,
+} from './world.js';

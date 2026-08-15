@@ -13,6 +13,7 @@ import {
   decodePermalink,
   parseScenario,
   PermalinkCorrupt,
+  encodePermalink,
   publish,
   reproduce,
   SANDBOX_WATERMARK,
@@ -22,15 +23,12 @@ import {
   type PublishedRun,
   type Scenario,
 } from '@genesis/replay';
+import { workUnits } from '@genesis/replay';
 import { RigorUnavailable } from '@genesis/params';
 import { z } from 'zod';
 
 /** ticks x regions. A submitted run may not cost more than this. */
 const MAX_WORK_UNITS = 20_000;
-
-function workUnits(scenario: Scenario): number {
-  return scenario.ticks * Math.max(1, scenario.regions.length);
-}
 
 /** Locked invariant #8: the mark travels with the payload, not just the UI. */
 function withWatermark(published: PublishedRun): Record<string, unknown> {
@@ -49,15 +47,36 @@ export async function scenarioRoutes(app: FastifyInstance) {
   // Packs are fixed at build time, so their hashes are computed once and reused.
   let packCache: readonly Record<string, unknown>[] | undefined;
 
+  // Listing packs must not execute the full-world ones: they are ~900,000
+  // tick-regions each and would hold the endpoint for half a minute. Those come
+  // back with the scenario, the token and a null hash, and say so — a silent
+  // omission would read as "this pack has no hash".
   app.get('/packs', async () => {
-    packCache ??= SCENARIO_PACKS.map((pack) => ({
-      ...withWatermark(publish(pack)),
-      note: pack.note,
-      ticks: pack.ticks,
-      regions: pack.regions,
-      overrides: pack.overrides,
-      interventions: pack.interventions,
-    }));
+    packCache ??= SCENARIO_PACKS.map((pack) => {
+      const cost = workUnits(pack);
+      const describe = {
+        id: pack.id,
+        title: pack.title,
+        note: pack.note,
+        mode: pack.mode,
+        seed: pack.seed,
+        ticks: pack.ticks,
+        regions: pack.regions,
+        overrides: pack.overrides,
+        interventions: pack.interventions,
+        token: encodePermalink(pack),
+        workUnits: cost,
+        watermark: SANDBOX_WATERMARK,
+      };
+      if (cost > MAX_WORK_UNITS) {
+        return {
+          ...describe,
+          terminalHash: null,
+          hashOmitted: `costs ${cost.toLocaleString('en-US')} tick-regions, over this endpoint's ${MAX_WORK_UNITS.toLocaleString('en-US')} limit. Run it from the permalink locally.`,
+        };
+      }
+      return { ...describe, ...withWatermark(publish(pack)) };
+    });
     return { packs: packCache };
   });
 

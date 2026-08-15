@@ -37,9 +37,27 @@ describe('GET /packs', () => {
     expect(packs).toHaveLength(10);
     for (const pack of packs) {
       expect(pack.token).toMatch(/^g1\./);
-      expect(pack.terminalHash).toMatch(/^[0-9a-f]{64}$/);
       expect(pack.watermark.join(' ')).toMatch(/SANDBOX OUTPUT/);
     }
+  });
+
+  it('says why the full-world packs have no hash instead of just omitting one', () => {
+    // Executing them here would hold the endpoint for half a minute. A null with
+    // no explanation would read as "this pack has no hash".
+    return get('/packs').then((res) => {
+      const { packs } = res.json();
+      const heavy = packs.filter((p: { terminalHash: string | null }) => p.terminalHash === null);
+      const light = packs.filter((p: { terminalHash: string | null }) => p.terminalHash !== null);
+
+      expect(heavy.map((p: { id: string }) => p.id)).toEqual(['all-of-it', 'no-plague']);
+      for (const pack of heavy) {
+        expect(pack.hashOmitted).toMatch(/tick-regions/);
+        expect(pack.workUnits).toBeGreaterThan(20000);
+      }
+      for (const pack of light) {
+        expect(pack.terminalHash).toMatch(/^[0-9a-f]{64}$/);
+      }
+    });
   });
 });
 

@@ -36,6 +36,17 @@ export interface SimModule {
 export interface RunOptions {
   readonly seed: bigint;
   readonly modules: readonly SimModule[];
+  /**
+   * 'none' runs the simulation without recording the factor ledger.
+   *
+   * The ledger is how any number is traced back to the parameters behind it, so
+   * it is on by default and every provenance path depends on it. It is also
+   * about 6.4M entries for 177 countries over 1000 ticks, which is more than a
+   * browser tab should hold when all the caller wants is a map. Turning it off
+   * does not change the simulation: state, hashes and RNG draws are identical
+   * either way, and a test pins that.
+   */
+  readonly ledger?: 'full' | 'none';
 }
 
 export class Run {
@@ -43,8 +54,10 @@ export class Run {
   private readonly store = new StateStore();
   private readonly streams = new Map<string, Rng>();
   private currentTick = 0;
+  private readonly recording: boolean;
 
   constructor(private readonly options: RunOptions) {
+    this.recording = (options.ledger ?? 'full') === 'full';
     const seen = new Set<string>();
     for (const module of options.modules) {
       if (seen.has(module.id)) throw new Error(`run: duplicate module id ${module.id}`);
@@ -82,15 +95,17 @@ export class Run {
         }
         const previous = this.store.get(qualified);
         this.store.set(qualified, value);
-        this.ledger.record({
-          tick: this.currentTick,
-          moduleId: module.id,
-          stateKey: qualified,
-          previous,
-          next: value,
-          factors,
-          reads: [...reads],
-        });
+        if (this.recording) {
+          this.ledger.record({
+            tick: this.currentTick,
+            moduleId: module.id,
+            stateKey: qualified,
+            previous,
+            next: value,
+            factors,
+            reads: [...reads],
+          });
+        }
       },
     };
   }
