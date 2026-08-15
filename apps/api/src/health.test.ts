@@ -4,7 +4,7 @@ import { buildServer } from './index.js';
 
 describe('GET /health', () => {
   it('responds ok and never implies a mode it has not established', async () => {
-    const app = buildServer();
+    const app = buildServer({ logger: false });
     await app.ready();
     const res = await app.inject({ method: 'GET', url: '/health' });
     expect(res.statusCode).toBe(200);

@@ -12,6 +12,7 @@ from collections.abc import Callable
 
 import numpy as np
 
+from .budget import assert_within_budget, estimate_identifiability
 from .identifiability.profile import profile_likelihood
 from .identifiability.report import IdentifiabilityReport, RunMode
 from .identifiability.sobol import ParameterSpace, run_sobol
@@ -32,12 +33,24 @@ def run_identifiability(
     sobol_n: int = 512,
     grid_points: int = 21,
     profile_grid: list[tuple[float, float]] | None = None,
+    unattended: bool = False,
 ) -> IdentifiabilityReport:
     """`profile_grid` narrows where each profile is evaluated.
 
     Keep it inside the region where the other parameters can still compensate,
     or the profile reports the box constraint rather than the data.
     """
+    # Priced before anything runs. An over-budget job raises here rather than
+    # after an hour of Sobol. See budget.py.
+    assert_within_budget(
+        estimate_identifiability(
+            dimensions=len(space.names),
+            sobol_n=sobol_n,
+            grid_points=grid_points,
+        ),
+        unattended=unattended,
+    )
+
     sobol = run_sobol(space, summary, n=sobol_n)
 
     verdicts: list[ParameterVerdict] = []

@@ -105,9 +105,57 @@ uv run mypy src
 
 Both `determinism` and `gate` run in CI on every push. A red gate blocks merge.
 
+## Preflight
+
+```bash
+pnpm preflight
+```
+
+Nine checks, locally, in one command: typecheck, lint, build, test, determinism,
+gate, plus three CI does not run — it starts the API in process and reads
+`/ready`, reproduces all eight scenario packs from their own permalinks, and runs
+the Python suite. Pass step names to run a subset (`pnpm preflight gate readiness`).
+
+Every step prints PASS or FAIL with its own timing, and the run does not stop at
+the first failure — "3 of 9 failed" is more useful than "the second one failed".
+
+A step that exits 0 without doing anything counts as a failure. This is not
+hypothetical: the first version of the script filtered on `genesis-calibrate`,
+which matches no workspace (the package is `@genesis/calibrate`), so pnpm printed
+"No projects matched", exited 0, and preflight reported PASS in 0.1 seconds.
+
+## Cost caps
+
+The roadmap names Bayesian inference as the spend risk, not traffic. The cap is
+enforced in `apps/calibrate/src/genesis_calibrate/budget.py`, priced in model
+evaluations, and checked **before** a job starts:
+
+- Sobol is costed at Saltelli's `n(2D+2)`, not `n`.
+- Profile likelihood counts the inner optimiser, which is most of the cost.
+- NUTS counts tuning and leapfrog steps, not just draws.
+
+An over-budget job is refused, not trimmed — quietly dropping to 200 draws would
+return a posterior that reads like the one that was asked for. `GENESIS_CALIBRATE_MAX_EVALS`
+raises the cap on purpose; a typo in it is an error rather than a fallback to the
+default, so a mistyped cap cannot become a bigger one. An **unattended** run
+refuses to start on an inherited cap at all — somebody has to have chosen the
+number. `GET /budget` reports the cap in force and whether it was set or inherited.
+
+The default admits the whole Phase 3 identifiability pipeline (~22k evaluations)
+and refuses a four-chain NUTS run (~1M). That asymmetry is the point; a default
+high enough to wave a real inference job through is a decoration, not a cap.
+
 ## Status
 
-Phases 0 through 8 complete. CI green.
+Phases 0 through 8 complete. CI green. Phase 9's hardening is done and its
+deployment is not started, on purpose — Genesis runs locally and nothing about
+it assumes a host.
+
+`/health` is a cheap liveness ping. `/ready` is the expensive one: it re-derives
+the invariants that would make every answer this service gives worthless if they
+broke — the kernel is deterministic, and the gate still blocks Rigor over
+INVENTED — rather than reporting a flag set at boot. A gate that stops blocking
+is reported as unhealthy, not as a pass.
 
 **Rigor mode ships empty.** Phases 3 and 4 tested the two parameters the track
 was built around and both failed. `climate_sensitivity` clears the identifiability

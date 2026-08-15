@@ -2,21 +2,28 @@ import { fileURLToPath } from 'node:url';
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import { counterfactualRoutes } from './routes/counterfactual.js';
+import { readyRoutes } from './routes/ready.js';
 import { scenarioRoutes } from './routes/scenario.js';
 import { KERNEL_VERSION, PHASE } from '@genesis/kernel';
 
 const PORT = Number(process.env['API_PORT'] ?? 4300);
 const HOST = process.env['API_HOST'] ?? '0.0.0.0';
 
-export function buildServer() {
+export interface ServerOptions {
+  /** Off for preflight and tests, which want the report and not the request log. */
+  readonly logger?: boolean;
+}
+
+export function buildServer(options: ServerOptions = {}) {
   // A permalink is the whole scenario, not a database key, so it arrives as a
   // path parameter several hundred characters long. Fastify's default cap is 100
   // and a token over it 404s rather than erroring, which reads as "no such run".
-  const app = Fastify({ logger: true, maxParamLength: 8192 });
+  const app = Fastify({ logger: options.logger ?? true, maxParamLength: 8192 });
 
   app.register(cors, { origin: true });
   app.register(counterfactualRoutes);
   app.register(scenarioRoutes);
+  app.register(readyRoutes);
 
   app.get('/health', async () => ({
     status: 'ok',

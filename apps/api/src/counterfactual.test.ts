@@ -4,7 +4,7 @@ import { buildServer } from './index.js';
 // payload must be a concrete object type: `unknown` makes inject()'s overload
 // resolve to the chainable form, and every .statusCode read then fails to type.
 const post = async (body: Record<string, unknown>) => {
-  const app = buildServer();
+  const app = buildServer({ logger: false });
   await app.ready();
   const res = await app.inject({ method: 'POST', url: '/counterfactual', payload: body });
   await app.close();
