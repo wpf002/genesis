@@ -41,11 +41,18 @@ export const empireEndures = (): Lever => ({
     'politics.legitimacy.restoration_rate': '0.12',
     'politics.legitimacy.decay': '0.015',
     'politics.state.fragmentation_pressure': '0.25',
-    'trade.route.risk_premium': '0.15',
+    // A state that survives keeps its roads open and its canals dug. Without
+    // these, the lever moved population by 0.0%: the model returns population to
+    // whatever the food supply carries, so a counterfactual that does not touch
+    // carrying capacity does not survive to the terminal year.
+    'trade.route.risk_premium': '0.1',
+    'trade.port.throughput_cap': '150000',
+    'agriculture.irrigation.build_share': '0.14',
+    'agriculture.irrigation.capital_decay': '0.012',
   },
   shocks: [],
   reading:
-    'The state holds: legitimacy recovers twice as fast, decays half as fast, fragmentation pressure halved, and safer roads.',
+    'The state holds, and keeps working: legitimacy recovers faster and decays slower, fragmentation pressure quartered, roads safer, ports wider and three times the surplus going into canals.',
 });
 
 /** An empire comes apart: legitimacy collapses and the roads stop paying. */
@@ -55,7 +62,11 @@ export const empireBreaks = (): Lever => ({
     'politics.legitimacy.decay': '0.06',
     'politics.legitimacy.restoration_rate': '0.03',
     'politics.state.fragmentation_pressure': '0.9',
-    'trade.route.risk_premium': '0.6',
+    // The roads and the canals go with it.
+    'trade.route.risk_premium': '0.7',
+    'trade.port.throughput_cap': '12000',
+    'agriculture.irrigation.build_share': '0.012',
+    'agriculture.irrigation.capital_decay': '0.05',
   },
   shocks: [
     {
@@ -65,7 +76,7 @@ export const empireBreaks = (): Lever => ({
     },
   ],
   reading:
-    'The state comes apart: legitimacy is cut at the divergence and then decays four times as fast against a fragmentation pressure nearly doubled.',
+    'The state comes apart and takes its infrastructure with it: legitimacy cut at the divergence, decaying four times as fast, canals abandoned and the ports down to a quarter.',
 });
 
 /** A conquest: the winner absorbs, so reach and population step up. */
@@ -75,6 +86,10 @@ export const conquest = (): Lever => ({
     'conflict.logistics.range_penalty': '0.0002',
     'conflict.recruitment.surplus_share': '0.2',
     'trade.route.min_reach': '0.35',
+    // A conquest that holds is a bigger single market with one set of roads.
+    'trade.route.risk_premium': '0.12',
+    'trade.port.throughput_cap': '140000',
+    'agriculture.irrigation.build_share': '0.12',
   },
   shocks: [
     {
@@ -84,7 +99,7 @@ export const conquest = (): Lever => ({
     },
   ],
   reading:
-    'Armies project further for less: half the distance penalty, double the recruitment share, and a standing floor under trade reach.',
+    'Armies project further for less, and what they take stays taken: half the distance penalty, double the recruitment, safer roads across the whole territory and more surplus going into canals.',
 });
 
 /** A conquest fails: the army breaks and the frontier closes. */
@@ -93,6 +108,8 @@ export const conquestFails = (): Lever => ({
   overrides: {
     'conflict.logistics.range_penalty': '0.0009',
     'conflict.attrition.baseline': '0.35',
+    'trade.route.risk_premium': '0.55',
+    'trade.port.throughput_cap': '25000',
   },
   shocks: [
     {
@@ -102,7 +119,7 @@ export const conquestFails = (): Lever => ({
     },
   ],
   reading:
-    'The campaign fails: strength cut to a third at the divergence, attrition raised, and the reach penalty more than doubled.',
+    'The campaign fails and the frontier closes behind it: strength cut to a third, attrition raised, the reach penalty more than doubled and the roads less safe.',
 });
 
 /** A pandemic that never happens, or one held down. */

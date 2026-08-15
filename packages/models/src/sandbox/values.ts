@@ -20,6 +20,7 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   'agriculture.storage.spoilage_rate': '0.15',
   'agriculture.yield.technology_weight': '1.2',
   'agriculture.storage.import_weight': '0.6',
+  'agriculture.storage.import_halfsat': '25000',
 
   // demography
   'demography.fertility.baseline': '2.1',
@@ -38,6 +39,8 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   'trade.gravity.distance_exponent': '1',
   'trade.gravity.mass_exponent': '1',
   'trade.route.risk_premium': '0.3',
+  'trade.route.fragmentation_penalty': '0.8',
+  'trade.route.max_disorder': '0.9',
   'trade.port.throughput_cap': '50000',
 
   // disease
@@ -49,6 +52,7 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   // conflict
   'conflict.lanchester.exponent': '2',
   'conflict.attrition.baseline': '0.2',
+  'conflict.casualties.population_weight': '1.5',
   'conflict.logistics.range_penalty': '0.0004',
 
   // politics

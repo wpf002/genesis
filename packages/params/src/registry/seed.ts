@@ -19,6 +19,7 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   { key: 'agriculture.irrigation.capital_decay', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Guess. Makes abandoned canals silt up on a human timescale.' },
   { key: 'agriculture.yield.technology_weight', unit: 'dimensionless', provenance: 'INVENTED', note: 'How much adopted technology multiplies yield. Added when a sensitivity sweep showed technology moved terminal population by 0.0% because nothing read it.' },
   { key: 'agriculture.storage.import_weight', unit: 'tonnes_per_year', provenance: 'INVENTED', note: 'Food arriving by trade rather than out of the ground. Added for the same reason: closing every road cost a region nothing.' },
+  { key: 'agriculture.storage.import_halfsat', unit: 'tonnes_per_year', provenance: 'INVENTED', note: 'Trade volume at which imports reach half their ceiling. A fixed reference, because normalising by the port cap made raising the cap reduce imports.' },
   { key: 'agriculture.storage.spoilage_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Chosen so granaries buffer one bad year but not three.' },
 
   // --- demography --------------------------------------------------------
@@ -37,6 +38,8 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   // --- trade -------------------------------------------------------------
   { key: 'trade.gravity.distance_exponent', unit: 'dimensionless', provenance: 'INVENTED', note: 'Gravity model exponent set to the textbook value out of habit, not evidence.' },
   { key: 'trade.gravity.mass_exponent', unit: 'dimensionless', provenance: 'INVENTED', note: 'Symmetric with the distance exponent because it looked tidy.' },
+  { key: 'trade.route.max_disorder', unit: 'fraction', provenance: 'INVENTED', note: 'Ceiling on how much fragmentation may throttle trade. Even a collapsing state moves some goods.' },
+  { key: 'trade.route.fragmentation_penalty', unit: 'dimensionless', provenance: 'INVENTED', note: 'How much a fragmented state throttles its own trade. Added for the same reason: fragmentation was computed and never read.' },
   { key: 'trade.route.risk_premium', unit: 'fraction', provenance: 'INVENTED', note: 'Makes long routes unattractive during conflict.' },
   { key: 'trade.port.throughput_cap', unit: 'tonnes_per_year', provenance: 'INVENTED', note: 'Round number chosen to create a bottleneck worth seeing.' },
 
@@ -48,6 +51,7 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
 
   // --- conflict ----------------------------------------------------------
   { key: 'conflict.lanchester.exponent', unit: 'dimensionless', provenance: 'INVENTED', note: 'Square-law exponent assumed; the choice between linear and square was not tested.' },
+  { key: 'conflict.casualties.population_weight', unit: 'people_per_unit_strength', provenance: 'INVENTED', note: 'How many people a unit of army losses costs the population. Added when a sweep showed every conquest scenario moved population by 0.0% because nothing read conflict losses.' },
   { key: 'conflict.attrition.baseline', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Set so wars end in years rather than generations.' },
   { key: 'conflict.logistics.range_penalty', unit: 'fraction_per_km', provenance: 'INVENTED', note: 'Invented to stop armies projecting power across the map.' },
 

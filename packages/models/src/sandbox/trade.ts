@@ -31,13 +31,25 @@ export function trade(params: SandboxParams, region = ''): SimModule {
       // mass_exponent is 1, so mass is the plain product. Kept explicit so the
       // exponent has somewhere to go when it stops being 1.
       const mass = Fx.mul(Fx.add(capital, Fx.ONE), Fx.add(population, Fx.ONE));
-      const throttled = Fx.mul(mass, Fx.sub(Fx.ONE, risk));
+      // Fragmentation was computed by politics and read by nobody, so a state
+      // coming apart cost its trade nothing at all.
+      const fragmentation = ctx.get(q('politics_elites.fragmentation'));
+      const disorder = Fx.clamp(
+        Fx.mul(fragmentation, params.get('trade.route.fragmentation_penalty')),
+        Fx.ZERO,
+        params.get('trade.route.max_disorder'),
+      );
+      const throttled = Fx.mul(
+        Fx.mul(mass, Fx.sub(Fx.ONE, risk)),
+        Fx.sub(Fx.ONE, disorder),
+      );
       const cap = params.get('trade.port.throughput_cap');
 
       ctx.set('volume', Fx.clamp(throttled, Fx.ZERO, cap), [
         params.factor('trade.gravity.mass_exponent', mass),
         params.factor('trade.route.risk_premium', Fx.neg(risk)),
         params.factor('trade.port.throughput_cap', cap),
+        params.factor('trade.route.fragmentation_penalty', Fx.neg(disorder)),
       ]);
     },
   };

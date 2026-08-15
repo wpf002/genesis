@@ -3,6 +3,7 @@ import { FlowField } from '@/components/FlowField';
 // Nothing on this page is simulation output.
 
 const LINKS = [
+  { href: '/what-if', label: 'What if — 180 scenarios' },
   { href: '/scenarios', label: 'Run a timeline' },
   { href: '/map', label: 'Map' },
   { href: '/diff', label: 'Compare runs' },
@@ -67,8 +68,9 @@ export default function Home() {
           <div>
             <h3 className="text-sm font-semibold text-ink">Break something on purpose</h3>
             <p className="mt-3 text-sm leading-relaxed text-ink-secondary">
-              Stop the plague. Exhaust the soil. Close the roads. Flood the country with
-              elites who all want the same jobs. Then watch where it lands.
+              180 of them ready to run: Rome never falls, the Black Death never comes,
+              Carthage beats Hannibal's enemies, Germany wins the first war. Or exhaust
+              the soil and close the roads yourself.
             </p>
           </div>
           <div>

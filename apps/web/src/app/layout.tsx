@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
+  { href: '/what-if', label: 'What if' },
   { href: '/scenarios', label: 'Timelines' },
   { href: '/map', label: 'Map' },
   { href: '/diff', label: 'Compare' },

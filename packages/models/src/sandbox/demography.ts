@@ -53,13 +53,22 @@ export function demography(params: SandboxParams, region = ''): SimModule {
       const infectious = ctx.get(q('disease_seird.infectious'));
       const plague = Fx.mul(population, Fx.mul(infectious, params.get('demography.mortality.plague_coefficient')));
 
-      const next = Fx.sub(Fx.add(Fx.sub(population, deaths), births), Fx.add(leaving, plague));
+      // Armies were losing people to a subsystem nobody read. Without this,
+      // every conquest scenario in the catalogue moved population by 0.0%.
+      const losses = ctx.get(q('conflict_lanchester.losses'));
+      const war = Fx.mul(losses, params.get('conflict.casualties.population_weight'));
+
+      const next = Fx.sub(
+        Fx.add(Fx.sub(population, deaths), births),
+        Fx.add(Fx.add(leaving, plague), war),
+      );
       ctx.set('population', Fx.max(Fx.ZERO, next), [
         params.factor('demography.fertility.baseline', births),
         params.factor('demography.mortality.infant_baseline', Fx.neg(deaths)),
         params.factor('demography.mortality.famine_elasticity', Fx.neg(shortfall)),
         params.factor('demography.migration.push_threshold', Fx.neg(leaving)),
         params.factor('disease.seird.case_fatality', Fx.neg(plague)),
+        params.factor('conflict.casualties.population_weight', Fx.neg(war)),
       ]);
     },
   };

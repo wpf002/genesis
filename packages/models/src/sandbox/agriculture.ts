@@ -69,10 +69,14 @@ export function agriculture(params: SandboxParams, region = ''): SimModule {
 
       // Food arrives by road as well as out of the ground. Without this, closing
       // the trade network cost a region nothing at all.
+      // Saturating on a fixed reference, not on the port cap. Normalising by the
+      // cap made this insensitive in the worst way: volume is clamped to the cap
+      // upstream, so the ratio pinned at 1 and raising the cap *lowered* it.
+      // Two runs that differed only in trade came out byte-identical.
       const volume = ctx.get(q('trade.volume'));
-      const cap = params.get('trade.port.throughput_cap');
+      const halfsat = params.get('agriculture.storage.import_halfsat');
       const imported = Fx.mul(
-        Fx.clamp(Fx.div(volume, cap), Fx.ZERO, Fx.ONE),
+        Fx.div(volume, Fx.add(volume, halfsat)),
         params.get('agriculture.storage.import_weight'),
       );
 
