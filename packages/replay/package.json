@@ -12,8 +12,9 @@
   },
   "dependencies": {
     "@genesis/kernel": "workspace:*",
+    "@genesis/models": "workspace:*",
     "@genesis/params": "workspace:*",
-    "@genesis/models": "workspace:*"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

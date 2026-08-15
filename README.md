@@ -107,7 +107,7 @@ Both `determinism` and `gate` run in CI on every push. A red gate blocks merge.
 
 ## Status
 
-Phases 0 through 5 complete. CI green.
+Phases 0 through 8 complete. CI green.
 
 **Rigor mode ships empty.** Phases 3 and 4 tested the two parameters the track
 was built around and both failed. `climate_sensitivity` clears the identifiability
@@ -135,6 +135,13 @@ names the full path, and cannot be relaxed under `NODE_ENV=production`.
 
 Sandbox runs 18 subsystems over 5000 simulated years in 85ms, deterministic from
 seed, no float in state, every output refused promotion to Rigor.
+
+**Scenarios.** Eight authored Sandbox packs, each one a permalink that carries
+the whole scenario — seed, ticks, regions, parameter overrides, interventions —
+rather than a database key. `GET /scenario/:token` runs it and reports the
+terminal hash, reading nothing from disk. Titles and notes are not hashed, so
+renaming a published run leaves its config hash alone. See
+`docs/decisions/0006-permalinks-carry-the-scenario.md`.
 
 **Known debt.** 47 inline numeric constants across the subsystems are not in the
 registry, so the gate cannot see them. A test pins the count and it only goes

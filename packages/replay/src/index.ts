@@ -72,3 +72,44 @@ export {
 } from './branch.js';
 
 export { divergenceTimeline, type Divergence } from './divergence.js';
+
+export {
+  baselineOf,
+  canonicalConfig,
+  configHash,
+  MAX_TICKS,
+  orderedInterventions,
+  parseScenario,
+  runScenario,
+  SCENARIO_FORMAT,
+  ScenarioInvalid,
+  scenarioSchema,
+  type Scenario,
+  type ScenarioIntervention,
+  type ScenarioRun,
+} from './scenario.js';
+
+export {
+  base64UrlDecode,
+  base64UrlEncode,
+  canonicalJson,
+  decodePermalink,
+  encodePermalink,
+  PERMALINK_VERSION,
+  PermalinkCorrupt,
+  publish,
+  reproduce,
+  verifyPermalink,
+  type PublishedRun,
+  type Reproduction,
+} from './permalink.js';
+
+export { packById, SCENARIO_PACKS } from './packs.js';
+
+export {
+  HEADLINE_KEYS,
+  headlineKeysFor,
+  readSeries,
+  type Sample,
+  type Series,
+} from './series.js';

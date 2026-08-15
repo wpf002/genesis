@@ -25,7 +25,7 @@ import { SandboxParams } from './sandbox/resolve.js';
 import { technologyAdoption, technologyDiffusion } from './sandbox/technology.js';
 import { trade } from './sandbox/trade.js';
 
-export { SandboxParams } from './sandbox/resolve.js';
+export { OverrideRejected, SandboxParams } from './sandbox/resolve.js';
 export { SANDBOX_VALUES } from './sandbox/values.js';
 
 /** The order subsystems run in. Adding one appends here, deliberately. */

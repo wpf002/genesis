@@ -69,6 +69,12 @@ export default function Home() {
           >
             Map →
           </a>
+          <a
+            href="/scenarios"
+            className="ml-3 mt-10 inline-flex items-center gap-2 rounded border border-rule px-4 py-2 font-mono text-xs tracking-[0.08em] text-ink transition-colors hover:bg-surface"
+          >
+            Scenarios →
+          </a>
           <p className="label mt-16">This is wallpaper.</p>
         </div>
       </section>
