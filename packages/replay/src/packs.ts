@@ -14,6 +14,30 @@ import { parseScenario, SCENARIO_FORMAT, type Scenario } from './scenario.js';
 const packs: readonly unknown[] = [
   {
     format: SCENARIO_FORMAT,
+    id: 'all-of-it',
+    title: 'All of it',
+    note: 'Six regions, one year per tick, 3000 BC to the present. Nothing touched — this is the run every other timeline is measured against.',
+    mode: 'SANDBOX',
+    seed: '1',
+    ticks: 5000,
+    regions: ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'],
+  },
+  {
+    format: SCENARIO_FORMAT,
+    id: 'no-plague',
+    title: 'The plague never comes',
+    note: 'Same five thousand years, with disease transmission cut to a tenth. The question this answers is what the dying was holding down.',
+    mode: 'SANDBOX',
+    seed: '1',
+    ticks: 5000,
+    regions: ['EGY', 'CHN', 'ITA', 'IND', 'FRA', 'TUR'],
+    overrides: {
+      'disease.seird.beta_baseline': '0.035',
+      'disease.spatial.coupling_strength': '0.005',
+    },
+  },
+  {
+    format: SCENARIO_FORMAT,
     id: 'baseline',
     title: 'Baseline',
     note: 'Nothing overridden, nothing intervened. Every other pack is a diff against this one.',

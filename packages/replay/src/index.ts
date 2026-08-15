@@ -107,6 +107,18 @@ export {
 export { packById, SCENARIO_PACKS } from './packs.js';
 
 export {
+  chronicle,
+  conditionFrames,
+  formatYear,
+  START_YEAR,
+  yearOf,
+  type Condition,
+  type Frame,
+  type Severity,
+  type WorldEvent,
+} from './chronicle.js';
+
+export {
   HEADLINE_KEYS,
   headlineKeysFor,
   readSeries,

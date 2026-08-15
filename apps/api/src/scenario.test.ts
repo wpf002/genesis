@@ -34,7 +34,7 @@ describe('GET /packs', () => {
     const res = await get('/packs');
     expect(res.statusCode).toBe(200);
     const { packs } = res.json();
-    expect(packs).toHaveLength(8);
+    expect(packs).toHaveLength(10);
     for (const pack of packs) {
       expect(pack.token).toMatch(/^g1\./);
       expect(pack.terminalHash).toMatch(/^[0-9a-f]{64}$/);

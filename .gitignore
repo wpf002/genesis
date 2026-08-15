@@ -19,3 +19,6 @@ runs/
 *.db
 *.sqlite
 .DS_Store
+
+# next build writes here so it cannot corrupt a running dev server
+.next-build/

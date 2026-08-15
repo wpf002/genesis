@@ -5,6 +5,9 @@ import {
   base64UrlDecode,
   base64UrlEncode,
   baselineOf,
+  chronicle,
+  conditionFrames,
+  formatYear,
   canonicalConfig,
   configHash,
   decodePermalink,
@@ -246,8 +249,8 @@ describe('the Phase 8 exit gate', () => {
 });
 
 describe('scenario packs', () => {
-  it('ships eight of them, all Sandbox and all watermark-required', () => {
-    expect(SCENARIO_PACKS).toHaveLength(8);
+  it('ships ten of them, all Sandbox and all watermark-required', () => {
+    expect(SCENARIO_PACKS).toHaveLength(10);
     for (const pack of SCENARIO_PACKS) {
       expect(pack.mode).toBe('SANDBOX');
       expect(publish(pack).watermarkRequired).toBe(true);
@@ -324,6 +327,44 @@ describe('scenario packs', () => {
         expect(series.samples.length, series.stateKey).toBeGreaterThan(0);
       }
     }
+  });
+
+  it('names fewer plagues in the timeline where the plague never comes', () => {
+    // Guards a real bug: the thresholds were percentiles of each region's own
+    // distribution, so a world with almost no disease still had a top five
+    // percent, and "the plague never comes" reported MORE plagues than the
+    // baseline. Disease burden is a share of the population, not a rank.
+    const withPlague = packById('all-of-it') as Scenario;
+    const without = packById('no-plague') as Scenario;
+
+    const plagues = (pack: Scenario) =>
+      chronicle(runScenario(pack).run, pack.regions).filter(
+        (event) => event.headline === 'Plague spreads',
+      ).length;
+
+    expect(plagues(withPlague)).toBeGreaterThan(0);
+    expect(plagues(without)).toBe(0);
+  });
+
+  it('paints a map that is mostly quiet, so a flash of colour means something', () => {
+    const pack = packById('all-of-it') as Scenario;
+    const frames = conditionFrames(runScenario(pack).run, pack.regions);
+    const cells = frames.flatMap((frame) => frame.regions);
+    const steady = cells.filter((c) => c.state === 'steady').length / cells.length;
+
+    // The first version painted every region "famine" for the whole run because
+    // the cutoff sat above where food ratio actually lives.
+    expect(steady).toBeGreaterThan(0.6);
+    expect(steady).toBeLessThan(0.98);
+    expect(new Set(cells.map((c) => c.state)).size).toBeGreaterThanOrEqual(4);
+  });
+
+  it('starts the clock in 3000 BC and reaches the present', () => {
+    const pack = packById('all-of-it') as Scenario;
+    const frames = conditionFrames(runScenario(pack).run, pack.regions);
+    expect(formatYear(frames[0]?.year ?? 0)).toMatch(/BC$/);
+    expect(frames[frames.length - 1]?.year).toBe(2000);
+    expect(formatYear(2000)).toBe('AD 2000');
   });
 
   it('looks packs up by id', () => {
