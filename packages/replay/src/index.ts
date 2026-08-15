@@ -70,3 +70,5 @@ export {
   type Intervention,
   type Interval,
 } from './branch.js';
+
+export { divergenceTimeline, type Divergence } from './divergence.js';

@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
+import { counterfactualRoutes } from './routes/counterfactual.js';
 import { KERNEL_VERSION, PHASE } from '@genesis/kernel';
 
 const PORT = Number(process.env['API_PORT'] ?? 4300);
@@ -10,6 +11,7 @@ export function buildServer() {
   const app = Fastify({ logger: true });
 
   app.register(cors, { origin: true });
+  app.register(counterfactualRoutes);
 
   app.get('/health', async () => ({
     status: 'ok',

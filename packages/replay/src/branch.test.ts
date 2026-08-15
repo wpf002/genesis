@@ -76,3 +76,33 @@ describe('the hard product rule', () => {
     expect(Object.keys(interval).sort()).toEqual(['high', 'low', 'stateKey']);
   });
 });
+
+describe('divergence timeline', () => {
+  it('names the tick each key split, and what the branch blamed', async () => {
+    const { divergenceTimeline } = await import('./divergence.js');
+    const result = branch(request('SANDBOX'));
+    const timeline = divergenceTimeline(result.parent, result.child);
+
+    expect(timeline.length).toBeGreaterThan(0);
+    // The intervention lands at the fork, so nothing splits before it.
+    expect(timeline[0]?.tick).toBeGreaterThanOrEqual(result.forkTick);
+    // Sorted, so the head of the list is the origin of the split.
+    for (let i = 1; i < timeline.length; i++) {
+      expect(timeline[i]!.tick).toBeGreaterThanOrEqual(timeline[i - 1]!.tick);
+    }
+    // "Why" comes out of the ledger, not from a reconstruction.
+    expect(timeline[0]?.because.length).toBeGreaterThan(0);
+    for (const factor of timeline[0]!.because) {
+      expect(['CALIBRATED', 'ESTIMATED', 'INVENTED']).toContain(factor.provenance);
+    }
+  });
+
+  it('is empty when nothing was intervened on', async () => {
+    const { divergenceTimeline } = await import('./divergence.js');
+    const a = new Run(options());
+    const b = new Run(options());
+    a.advanceTo(100);
+    b.advanceTo(100);
+    expect(divergenceTimeline(a, b)).toEqual([]);
+  });
+});

@@ -37,6 +37,9 @@ export interface Interval {
 
 export interface BranchResult {
   readonly mode: Mode;
+  /** Kept so a divergence timeline can be read out of the ledgers. */
+  readonly parent: Run;
+  readonly child: Run;
   readonly forkTick: number;
   readonly parentHash: string;
   readonly branchHash: string;
@@ -83,6 +86,8 @@ export function branch(request: BranchRequest): BranchResult {
 
   return {
     mode: request.mode,
+    parent,
+    child,
     forkTick: request.forkTick,
     parentHash: parent.stateHash(),
     branchHash: child.stateHash(),
