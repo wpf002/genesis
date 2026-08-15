@@ -89,32 +89,22 @@ export default function Scenarios() {
   const year = frame?.year ?? 0;
   const isForecast = year > LAST_OBSERVED_YEAR;
 
-  const raf = useRef<number>();
+  // A timer, not requestAnimationFrame. rAF does not fire at all when the tab is
+  // not visible, so playback silently did nothing in a backgrounded window and
+  // there was no way to tell it apart from a broken button. setInterval keeps
+  // running, and the clock advancing is the proof that it does.
   useEffect(() => {
     if (!playing || frameCount === 0) return;
-    let last = 0;
-    const step = (now: number) => {
-      if (now - last > 40) {
-        last = now;
-        setIndex((current) => {
-          if (current + 1 >= frameCount) {
-            setPlaying(false);
-            return frameCount - 1;
-          }
-          return current + 1;
-        });
-      }
-      raf.current = requestAnimationFrame(step);
-    };
-    raf.current = requestAnimationFrame(step);
-    const onHide = () => {
-      if (document.hidden) setPlaying(false);
-    };
-    document.addEventListener('visibilitychange', onHide);
-    return () => {
-      if (raf.current !== undefined) cancelAnimationFrame(raf.current);
-      document.removeEventListener('visibilitychange', onHide);
-    };
+    const timer = setInterval(() => {
+      setIndex((current) => {
+        if (current + 1 >= frameCount) {
+          setPlaying(false);
+          return frameCount - 1;
+        }
+        return current + 1;
+      });
+    }, 40);
+    return () => clearInterval(timer);
   }, [playing, frameCount]);
 
   const sofar = useMemo(() => {

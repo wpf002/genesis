@@ -33,11 +33,27 @@ export function agriculture(params: SandboxParams, region = ''): SimModule {
       const sensitivity = params.get('agriculture.yield.climate_sensitivity');
       const soil = ctx.get(q('agriculture.soilQuality'));
 
+      // Irrigation and technology were computed by their own subsystems and then
+      // read by nobody, which is why changing either of them moved terminal
+      // population by 0.0%: yield was (base + climate) x soil and nothing else,
+      // so the whole model was a food-limited demography with four decorative
+      // subsystems attached. Both are read a tick late, which is what the fixed
+      // module order buys and costs.
+      const irrigation = ctx.get(q('irrigation.yieldBonus'));
+      const adopted = ctx.get(q('technology_adoption.adopted'));
+      const techWeight = params.get('agriculture.yield.technology_weight');
+      const multiplier = Fx.add(Fx.ONE, Fx.add(irrigation, Fx.mul(adopted, techWeight)));
+
       const climateTerm = Fx.mul(sensitivity, anomaly);
-      const nextYield = Fx.max(Fx.ZERO, Fx.mul(Fx.add(BASE_YIELD, climateTerm), soil));
+      const nextYield = Fx.max(
+        Fx.ZERO,
+        Fx.mul(Fx.mul(Fx.add(BASE_YIELD, climateTerm), soil), multiplier),
+      );
       ctx.set('yieldPerHectare', nextYield, [
         params.factor('agriculture.yield.tfp_exponent', BASE_YIELD),
         params.factor('agriculture.yield.climate_sensitivity', climateTerm),
+        params.factor('agriculture.irrigation.bonus_halfsat', irrigation),
+        params.factor('agriculture.yield.technology_weight', Fx.mul(adopted, techWeight)),
       ]);
 
       // Depletion scales with what is there; regeneration with what is missing,
@@ -51,11 +67,25 @@ export function agriculture(params: SandboxParams, region = ''): SimModule {
         params.factor('agriculture.soil.regeneration_rate', regrowth),
       ]);
 
+      // Food arrives by road as well as out of the ground. Without this, closing
+      // the trade network cost a region nothing at all.
+      const volume = ctx.get(q('trade.volume'));
+      const cap = params.get('trade.port.throughput_cap');
+      const imported = Fx.mul(
+        Fx.clamp(Fx.div(volume, cap), Fx.ZERO, Fx.ONE),
+        params.get('agriculture.storage.import_weight'),
+      );
+
       const stored = ctx.get(q('agriculture.storage'));
       const spoiled = Fx.mul(stored, params.get('agriculture.storage.spoilage_rate'));
-      ctx.set('storage', Fx.max(Fx.ZERO, Fx.add(Fx.sub(stored, spoiled), nextYield)), [
-        params.factor('agriculture.storage.spoilage_rate', Fx.neg(spoiled)),
-      ]);
+      ctx.set(
+        'storage',
+        Fx.max(Fx.ZERO, Fx.add(Fx.sub(stored, spoiled), Fx.add(nextYield, imported))),
+        [
+          params.factor('agriculture.storage.spoilage_rate', Fx.neg(spoiled)),
+          params.factor('agriculture.storage.import_weight', imported),
+        ],
+      );
     },
   };
 }

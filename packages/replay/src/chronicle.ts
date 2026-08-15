@@ -76,6 +76,17 @@ function percentile(sorted: readonly number[], p: number): number {
 interface Band {
   readonly low: number;
   readonly high: number;
+  readonly median: number;
+}
+
+/**
+ * A band only means something if the series actually spreads. Legitimacy sits
+ * pinned at one value for most of a run, so its 5th percentile equals its
+ * median, and `value <= low` then matched almost every tick — the map went
+ * entirely violet. A band whose edge is its middle is not a band.
+ */
+function discriminates(band: Band, edge: 'low' | 'high'): boolean {
+  return edge === 'low' ? band.low < band.median : band.high > band.median;
 }
 
 function bandsFor(table: SampleTable, region: string): Map<string, Band> {
@@ -84,7 +95,11 @@ function bandsFor(table: SampleTable, region: string): Map<string, Band> {
     const values = table.values.get(qualify(region, key));
     if (values === undefined) continue;
     const sorted = [...values].sort((a, b) => a - b);
-    bands.set(key, { low: percentile(sorted, 0.05), high: percentile(sorted, 0.95) });
+    bands.set(key, {
+      low: percentile(sorted, 0.05),
+      high: percentile(sorted, 0.95),
+      median: percentile(sorted, 0.5),
+    });
   }
   return bands;
 }
@@ -111,9 +126,11 @@ function classify(
 
   // Worst-thing-first, so the map answers "what is wrong here" in one colour.
   if (infectious >= PLAGUE_SHARE) return 'plague';
-  if (food !== undefined && foodRatio <= food.low) return 'famine';
-  if (rule !== undefined && legitimacy <= rule.low) return 'unrest';
-  if (food !== undefined && foodRatio >= food.high) return 'thriving';
+  if (food !== undefined && discriminates(food, 'low') && foodRatio <= food.low) return 'famine';
+  if (rule !== undefined && discriminates(rule, 'low') && legitimacy <= rule.low) return 'unrest';
+  if (food !== undefined && discriminates(food, 'high') && foodRatio >= food.high) {
+    return 'thriving';
+  }
   return 'steady';
 }
 
@@ -227,8 +244,8 @@ export function chronicle(table: SampleTable): readonly WorldEvent[] {
       if (values === undefined || band === undefined) continue;
 
       const level = rule.absolute ?? (rule.edge === 'high' ? band.high : band.low);
-      // A flat series has low === high and would fire on every tick.
-      if (rule.absolute === undefined && band.high === band.low) continue;
+      // A band whose edge is its middle fires on every tick. See discriminates().
+      if (rule.absolute === undefined && !discriminates(band, rule.edge)) continue;
 
       let previous: number | undefined;
       let mutedUntil = -1;

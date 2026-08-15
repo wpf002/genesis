@@ -137,3 +137,27 @@ export {
   type SampleRequest,
   type SampleTable,
 } from './world.js';
+
+export {
+  CATALOGUE,
+  ERAS,
+  entryById,
+  type CatalogueEntry,
+  type Era,
+} from './catalogue/entries.js';
+export { type Lever, type Shock } from './catalogue/levers.js';
+export {
+  LAST_OBSERVED_YEAR,
+  SPAN_TICKS,
+  runBaseline,
+  runCounterfactual,
+  tickOfYear,
+  type CounterfactualRun,
+} from './catalogue/engine.js';
+export {
+  expand,
+  type Confidence,
+  type Expansion,
+  type Finding,
+  type Stage,
+} from './catalogue/expansion.js';

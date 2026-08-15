@@ -17,6 +17,8 @@ export const SANDBOX_PARAMS: readonly ParamDecl[] = [
   { key: 'agriculture.soil.depletion_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Slow enough that depletion matters over centuries, not decades.' },
   { key: 'agriculture.soil.regeneration_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Added when a 5000-year run drove soil to its floor and never recovered. Set so fallow land comes back over a few generations.' },
   { key: 'agriculture.irrigation.capital_decay', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Guess. Makes abandoned canals silt up on a human timescale.' },
+  { key: 'agriculture.yield.technology_weight', unit: 'dimensionless', provenance: 'INVENTED', note: 'How much adopted technology multiplies yield. Added when a sensitivity sweep showed technology moved terminal population by 0.0% because nothing read it.' },
+  { key: 'agriculture.storage.import_weight', unit: 'tonnes_per_year', provenance: 'INVENTED', note: 'Food arriving by trade rather than out of the ground. Added for the same reason: closing every road cost a region nothing.' },
   { key: 'agriculture.storage.spoilage_rate', unit: 'fraction_per_year', provenance: 'INVENTED', note: 'Chosen so granaries buffer one bad year but not three.' },
 
   // --- demography --------------------------------------------------------

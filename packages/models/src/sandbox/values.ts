@@ -18,6 +18,8 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   'agriculture.soil.regeneration_rate': '0.03',
   'agriculture.irrigation.capital_decay': '0.02',
   'agriculture.storage.spoilage_rate': '0.15',
+  'agriculture.yield.technology_weight': '1.2',
+  'agriculture.storage.import_weight': '0.6',
 
   // demography
   'demography.fertility.baseline': '2.1',
@@ -74,7 +76,18 @@ export const SANDBOX_VALUES: Readonly<Record<string, string>> = {
   'demography.population.initial': '1000',
   'demography.consumption.need_per_head': '0.002',
   'demography.consumption.max_food_ratio': '2',
-  'demography.mortality.plague_coefficient': '0.05',
+  // Raised from 0.05, where an epidemic killed about half a percent of what
+  // births added and was invisible. 2.5 was the other mistake: it made disease
+  // dominate everything and cut baseline population by 95%. At 0.4 an epidemic
+  // is a visible dip in the timeline.
+  //
+  // It does not change where the run ends up, and that is the model, not the
+  // number. Population sits at the food supply's carrying capacity, so any
+  // mortality shock is made up within a generation - a deadlier plague even ends
+  // slightly *higher*, because fewer mouths means more food each. Only levers
+  // that move carrying capacity (yield, technology, trade, irrigation) shift the
+  // terminal state. Counterfactuals here are read in the timeline, not the total.
+  'demography.mortality.plague_coefficient': '0.4',
   'demography.migration.outflow_share': '0.1',
   'demography.migration.outflow_cap': '0.05',
   'disease.seird.removal_rate': '0.2',
