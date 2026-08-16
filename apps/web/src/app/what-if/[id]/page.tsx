@@ -12,8 +12,12 @@ import {
   NOT_A_PROBABILITY,
   REPRESENTABILITY,
   SUPPORT,
+  continuity,
+  peopleFor,
+  possibilitiesFor,
   type CatalogueEntry,
   type Confidence,
+  type Possibility,
   type WorldEvent,
 } from '@genesis/replay';
 import type { RealityMessage, RealityResult } from '@/lib/reality.worker';
@@ -26,6 +30,15 @@ import {
   RealityDnaChart,
   RippleMap,
 } from '@/components/reality/Panels';
+import {
+  ButterflyEffect,
+  CivilizationState,
+  HistoricalPressures,
+  KeyPeople,
+  PossibilityTree,
+  WhyLink,
+} from '@/components/reality/Layers';
+import { DiffMap, type DiffField } from '@/components/reality/DiffMap';
 import { ModeBadge } from '@/components/ModeBadge';
 
 // The Reality Explorer.
@@ -43,20 +56,34 @@ const REGIONS = [
 const TICKS = 5100;
 const LAST_OBSERVED_YEAR = 2025;
 
-type Mode = 'history' | 'alternate' | 'compare' | 'future';
+type Mode = 'history' | 'alternate' | 'compare' | 'cause' | 'future';
 
 const MODES: readonly { id: Mode; label: string }[] = [
   { id: 'history', label: 'Actual history' },
   { id: 'alternate', label: 'Alternate' },
   { id: 'compare', label: 'Compare' },
+  { id: 'cause', label: 'Why' },
   { id: 'future', label: 'Future' },
 ];
+
+/** Playback steps, in years. The scrubber moves in sampled frames. */
+const SPEEDS = [1, 5, 10, 25, 100] as const;
 
 /** Report tiers from the existing engine mapped onto the evidence taxonomy. */
 const TIER: Record<Confidence, Parameters<typeof EvidenceTag>[0]['kind']> = {
   high: 'simulated',
   extrapolation: 'knock-on',
   speculative: 'not-modelled',
+};
+
+/** Report rows that name a state variable can be traced back to it. */
+const FINDING_KEY: Record<string, string> = {
+  'People, where it happened': 'demography.population',
+  'People, everywhere else': 'demography.population',
+  'Food per head': 'demography.foodRatio',
+  'State authority': 'politics_legitimacy.legitimacy',
+  'Technology adopted': 'technology_adoption.adopted',
+  'Share of the world infectious': 'disease_seird.infectious',
 };
 
 const SEVERITY: Record<WorldEvent['severity'], string> = {
@@ -76,6 +103,9 @@ export default function RealityExplorer() {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [autoFollow, setAutoFollow] = useState(true);
+  const [step, setStep] = useState<number>(5);
+  const [selected, setSelected] = useState<string | undefined>();
+  const [diffField, setDiffField] = useState<DiffField>('population');
   const worker = useRef<Worker>();
 
   const start = useCallback((target: CatalogueEntry) => {
@@ -135,15 +165,17 @@ export default function RealityExplorer() {
     if (!playing || frameCount === 0) return;
     const timer = setTimeout(() => {
       setIndex((current) => {
-        if (current + 1 >= frameCount) {
+        // One sampled frame is 12 ticks, so a 25-year step is two frames.
+        const frames = Math.max(1, Math.round(step / 12));
+        if (current + frames >= frameCount) {
           setPlaying(false);
           return frameCount - 1;
         }
-        return current + 1;
+        return current + frames;
       });
     }, paceAt(at));
     return () => clearTimeout(timer);
-  }, [playing, frameCount, at, paceAt]);
+  }, [playing, frameCount, at, paceAt, step]);
 
   const chronicleSoFar = useMemo(() => {
     if (loaded === undefined || frame === undefined) return [];
@@ -309,6 +341,26 @@ export default function RealityExplorer() {
             >
               2026
             </button>
+            <button
+              onClick={() => seekToTick(TICKS)}
+              className="rounded border border-rule px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-secondary transition-colors hover:bg-surface"
+            >
+              2100
+            </button>
+            <span className="flex items-center gap-1 font-mono text-[10px] text-ink-muted">
+              step
+              {SPEEDS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStep(s)}
+                  className={`rounded border px-1.5 py-0.5 transition-colors ${
+                    s === step ? 'border-ink text-ink' : 'border-rule hover:text-ink-secondary'
+                  }`}
+                >
+                  {s}y
+                </button>
+              ))}
+            </span>
             <label className="flex items-center gap-2 font-mono text-[11px] text-ink-muted">
               <input
                 type="checkbox"
@@ -356,6 +408,7 @@ export default function RealityExplorer() {
                     subtitle="Genesis baseline"
                     conditions={baselineFrame.regions}
                     forecast={isForecast}
+                    onSelect={setSelected}
                   />
                 )}
                 <WorldView
@@ -363,8 +416,39 @@ export default function RealityExplorer() {
                   subtitle={formatYear(year)}
                   conditions={frame.regions}
                   forecast={isForecast}
+                  onSelect={setSelected}
                 />
               </div>
+
+              {selected !== undefined && (
+                <div className="mt-4 max-w-md">
+                  <CivilizationState
+                    condition={
+                      frame.regions.find((r) => r.region === selected) ?? frame.regions[0]!
+                    }
+                    baseline={baselineFrame?.regions.find((r) => r.region === selected)}
+                    pressures={
+                      loaded.regionPressures[selected]?.[at - (at % 8)] ??
+                      loaded.pressureSeries[at - (at % 8)] ??
+                      []
+                    }
+                    year={year}
+                    onClose={() => setSelected(undefined)}
+                  />
+                </div>
+              )}
+
+              {mode === 'compare' && baselineFrame !== undefined && (
+                <div className="mt-8">
+                  <DiffMap
+                    alternate={frame.regions}
+                    baseline={baselineFrame.regions}
+                    field={diffField}
+                    onField={setDiffField}
+                    onSelect={setSelected}
+                  />
+                </div>
+              )}
               <div className="mt-3">
                 <ConditionLegend />
               </div>
@@ -485,6 +569,47 @@ export default function RealityExplorer() {
             </>
           )}
 
+          {mode === 'cause' && (
+            <>
+              <section className="mt-10 grid gap-10 lg:grid-cols-2">
+                <ButterflyEffect data={loaded.butterfly} />
+                <HistoricalPressures
+                  data={loaded.pressureSeries[at - (at % 8)] ?? []}
+                  where={`world mean · ${formatYear(year)}`}
+                />
+              </section>
+
+              <section className="mt-10">
+                <RippleMap data={loaded.ripple} />
+              </section>
+
+              <section className="mt-10 grid gap-10 lg:grid-cols-2">
+                <PossibilityTree
+                  items={possibilitiesFor(entry.id)}
+                  onSimulate={(possibility: Possibility) => {
+                    const approx = possibility.approximation;
+                    if (approx === undefined) return;
+                    const query = new URLSearchParams({
+                      premise: possibility.title,
+                      archetype: approx.archetypeId,
+                      year: String(approx.year),
+                      regions: approx.regions.join(','),
+                      from: entry.id,
+                    });
+                    window.location.href = `/what-if/build?${query.toString()}`;
+                  }}
+                />
+                <KeyPeople
+                  people={peopleFor(entry.id)}
+                  continuityLevel={continuity(
+                    loaded.distance[at]?.distance ?? 0,
+                    Math.max(0, year - entry.year),
+                  )}
+                />
+              </section>
+            </>
+          )}
+
           {/* Staged report */}
           <section className="mt-12">
             <h3 className="font-mono text-xs uppercase tracking-[0.1em] text-ink">
@@ -516,7 +641,13 @@ export default function RealityExplorer() {
                           <div key={finding.label} className="border-t border-rule py-2">
                             <dt className="flex items-baseline justify-between gap-2">
                               <span className="text-[11px] text-ink-muted">{finding.label}</span>
-                              <EvidenceTag kind={projected && finding.confidence === 'high' ? 'projection' : TIER[finding.confidence]} />
+                              <span className="flex items-baseline gap-2">
+                                <WhyLink
+                                  stateKey={FINDING_KEY[finding.label] ?? null}
+                                  year={stage.year}
+                                />
+                                <EvidenceTag kind={projected && finding.confidence === 'high' ? 'projection' : TIER[finding.confidence]} />
+                              </span>
                             </dt>
                             <dd className="mt-0.5 font-mono text-xs text-ink">{finding.value}</dd>
                           </div>

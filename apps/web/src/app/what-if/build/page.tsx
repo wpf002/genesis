@@ -76,6 +76,20 @@ function Workbench() {
   // Arriving from "fork this reality" preloads that scenario as world one, so
   // the fork is a continuation rather than a retype.
   useEffect(() => {
+    // Arriving from "simulate approximation": the possibility already names an
+    // archetype, a year and a region set, so the draft is filled in and the
+    // preview still has to be read before anything runs.
+    const archetype = search.get('archetype');
+    if (archetype !== null) {
+      setDraft((d) => ({
+        ...d,
+        premise: search.get('premise') ?? d.premise,
+        archetypeId: archetype,
+        year: Number(search.get('year') ?? d.year),
+        regions: (search.get('regions') ?? '').split(',').filter((r) => r !== ''),
+      }));
+    }
+
     const from = search.get('from');
     if (from === null) return;
     const entry = entryById(from);
@@ -91,7 +105,9 @@ function Workbench() {
       },
     ]);
     setForkFrom('b1');
-    setDraft((d) => ({ ...d, year: Math.min(2099, entry.year + 100) }));
+    if (search.get('archetype') === null) {
+      setDraft((d) => ({ ...d, year: Math.min(2099, entry.year + 100) }));
+    }
   }, [search]);
 
   const suggestions = useMemo(

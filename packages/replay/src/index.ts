@@ -241,3 +241,28 @@ export {
   type Suggestion,
 } from './branching/translate.js';
 export { scenarioPhaseSchema, type ScenarioPhase } from './scenario.js';
+
+export {
+  BUTTERFLY_LIMITS,
+  butterfly,
+  type Butterfly,
+  type ButterflyNode,
+  type CascadeStage,
+} from './analysis/butterfly.js';
+export {
+  PRESSURES_NOT_MODELLED,
+  pressures,
+  type Pressure,
+} from './analysis/pressures.js';
+export {
+  CONTINUITY_NOTE,
+  PEOPLE,
+  POSSIBILITIES,
+  POSSIBILITY_CAVEAT,
+  continuity,
+  peopleFor,
+  possibilitiesFor,
+  type Continuity,
+  type Person,
+  type Possibility,
+} from './history/possibilities.js';

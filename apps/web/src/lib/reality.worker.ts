@@ -5,6 +5,7 @@
 // across messages — switching scenarios then costs one run, not two.
 
 import {
+  butterfly,
   cascades,
   chronicle,
   conditionFrames,
@@ -15,9 +16,11 @@ import {
   modelAgainstRecord,
   realityDistance,
   ripple,
+  pressures,
   runBaseline,
   runCounterfactual,
   spread,
+  type Butterfly,
   type CascadeEvent,
   type Convergence,
   type DistancePoint,
@@ -25,6 +28,7 @@ import {
   type FirstDifference,
   type FitPoint,
   type Frame,
+  type Pressure,
   type RegionArrival,
   type Ripple,
   type SampleTable,
@@ -49,6 +53,11 @@ export interface RealityResult {
   readonly firstDifference: FirstDifference | undefined;
   readonly arrivals: readonly RegionArrival[];
   readonly ripple: Ripple;
+  readonly butterfly: Butterfly;
+  /** World pressures per sampled tick, so the panel needs no re-run. */
+  readonly pressureSeries: readonly (readonly Pressure[])[];
+  /** Per-region tables kept so a country panel can be opened on any year. */
+  readonly regionPressures: Readonly<Record<string, readonly (readonly Pressure[])[]>>;
   readonly fit: readonly FitPoint[];
   readonly divergenceTick: number;
   readonly touched: readonly string[];
@@ -154,6 +163,27 @@ self.onmessage = async (event: MessageEvent<RealityRequest>) => {
       arrivals: spread(counter.table, base.table, counter.touched),
       // The ledger is off at world scale, so this is the coarse trace and says so.
       ripple: ripple(counter.table, base.table, counter.touched, changedParams, false),
+      butterfly: butterfly(
+        counter.table,
+        base.table,
+        counter.touched,
+        changedParams,
+        entry.year,
+        entry.lever.reading,
+      ),
+      // Sampled every eighth frame: enough for the panel to follow the scrubber
+      // without shipping sixteen numbers per country per year back.
+      pressureSeries: counter.table.ticks.map((_, i) =>
+        i % 8 === 0 ? pressures(counter.table, i) : [],
+      ),
+      regionPressures: Object.fromEntries(
+        counter.touched.slice(0, 12).map((region) => [
+          region,
+          counter.table.ticks.map((_, i) =>
+            i % 8 === 0 ? pressures(counter.table, i, region) : [],
+          ),
+        ]),
+      ),
       fit: modelAgainstRecord(populationAt(base.table), populationAt(counter.table), 1000),
       divergenceTick: counter.divergenceTick,
       touched: counter.touched,

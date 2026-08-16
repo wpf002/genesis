@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Fx, Run, type LedgerEntry } from '@genesis/kernel';
 import { sandboxModules } from '@genesis/models';
 import { ModeBadge } from '@/components/ModeBadge';
@@ -37,10 +38,25 @@ function useRun() {
   }, []);
 }
 
-export default function Inspector() {
+function InspectorInner() {
   const { entries, byTick, keys, hash } = useRun();
-  const [tick, setTick] = useState(TICKS);
-  const [stateKey, setStateKey] = useState<string | null>(null);
+  const search = useSearchParams();
+
+  // Arriving from a "why?" anywhere in the app. The key is unqualified there
+  // because the world runs are region-prefixed and this run is not, so the
+  // suffix is matched rather than the whole string.
+  const asked = search.get('key');
+  const openKey = useMemo(() => {
+    if (asked === null) return null;
+    const bare = asked.includes(':') ? (asked.split(':')[1] as string) : asked;
+    return keys.find((k) => k === bare || k.endsWith(`:${bare}`)) ?? null;
+  }, [asked, keys]);
+
+  const askedYear = Number(search.get('year') ?? Number.NaN);
+  const [tick, setTick] = useState(
+    Number.isFinite(askedYear) ? Math.max(1, Math.min(TICKS, askedYear + 3000)) : TICKS,
+  );
+  const [stateKey, setStateKey] = useState<string | null>(openKey);
   const [factorKey, setFactorKey] = useState<string | null>(null);
 
   // Click 1: a state value. Click 2: one of its factors. Click 3: a tick where
@@ -85,6 +101,38 @@ export default function Inspector() {
         <span className="font-mono text-sm tabular-nums text-ink">{tick}</span>
       </div>
       <p className="label mt-3 break-all">terminal state hash {hash}</p>
+
+      {asked !== null && (
+        <p
+          className="mt-3 rounded border-l-2 bg-surface p-3 text-xs leading-relaxed text-ink-secondary"
+          style={{ borderColor: 'var(--prov-calibrated)' }}
+        >
+          {openKey === null ? (
+            <>
+              Asked about <span className="font-mono text-ink">{asked}</span>, which this
+              run does not carry. It is a single-region run and the world runs are
+              region-prefixed; pick a key on the left instead.
+            </>
+          ) : (
+            <>
+              Opened on <span className="font-mono text-ink">{openKey}</span>
+              {search.get('region') === null ? null : (
+                <> from {search.get('region')}</>
+              )}
+              . This is an independent single-region run at the same seed, not the world
+              run you came from — the factor chain is the model&rsquo;s, the numbers are
+              this run&rsquo;s.
+              {Number.isFinite(askedYear) && askedYear + 3000 > TICKS && (
+                <>
+                  {' '}
+                  You asked for {askedYear < 0 ? `${-askedYear} BC` : `AD ${askedYear}`}, which
+                  is past this run&rsquo;s {TICKS} ticks; it is showing tick {TICKS} instead.
+                </>
+              )}
+            </>
+          )}
+        </p>
+      )}
 
       <div className="mt-8 grid gap-px overflow-hidden rounded border border-rule bg-rule lg:grid-cols-3">
         <section className="bg-surface p-5">
@@ -191,5 +239,21 @@ export default function Inspector() {
         Genesis does not claim Sandbox output means anything.
       </p>
     </main>
+  );
+}
+
+// Reached from any "why?" in the app with ?key=&region=&year=. The boundary is
+// required or the App Router refuses to prerender the route.
+export default function Inspector() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-6xl px-6 py-10">
+          <p className="font-mono text-xs text-ink-muted">Loading…</p>
+        </main>
+      }
+    >
+      <InspectorInner />
+    </Suspense>
   );
 }

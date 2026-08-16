@@ -61,12 +61,15 @@ export function WorldView({
   subtitle,
   conditions,
   forecast = false,
+  onSelect,
 }: {
   title: string;
   subtitle: string;
   conditions: readonly Condition[];
   /** Past the last year anybody could check. Drawn differently, deliberately. */
   forecast?: boolean;
+  /** Optional: clicking a country opens its state panel. */
+  onSelect?: (region: string) => void;
 }) {
   const byCode = useMemo(
     () => new Map(conditions.map((condition) => [condition.region, condition])),
@@ -124,6 +127,12 @@ export function WorldView({
               fillOpacity={opacity}
               stroke="var(--plane)"
               strokeWidth={0.4}
+              style={{
+                cursor: onSelect !== undefined && condition !== undefined ? 'pointer' : 'default',
+              }}
+              onClick={() => {
+                if (onSelect !== undefined && condition !== undefined) onSelect(code);
+              }}
             >
               <title>
                 {condition === undefined

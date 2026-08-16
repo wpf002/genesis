@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { WhyLink } from './Layers';
 import {
   DISTANCE_METHOD,
   DNA_NOT_MODELLED,
@@ -185,6 +186,10 @@ export function RealityDnaChart({
         <polygon points={poly(baseline)} fill="var(--ink-muted)" fillOpacity={0.16} stroke="var(--ink-muted)" strokeWidth={1} strokeDasharray="3 2" />
         <polygon points={poly(alternate)} fill="#3987e5" fillOpacity={0.2} stroke="#3987e5" strokeWidth={1.75} />
       </svg>
+      <p className="mt-1 flex flex-wrap items-baseline gap-3 font-mono text-[10px] text-ink-muted">
+        <span>every axis is a real Genesis state variable</span>
+        <WhyLink stateKey="demography.population" year={year} />
+      </p>
       <ul className="mt-2">
         {DNA_NOT_MODELLED.map((line) => (
           <li key={line} className="py-0.5 text-[10px] leading-relaxed text-ink-muted">
