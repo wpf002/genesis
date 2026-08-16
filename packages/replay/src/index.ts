@@ -218,3 +218,26 @@ export {
   type Observation,
   type Source,
 } from './history/observations.js';
+
+export {
+  BranchInvalid,
+  assertBranchValid,
+  fork,
+  runBranch,
+  type Branch,
+  type BranchRun,
+  type BranchRunRequest,
+  type Phase,
+} from './branching/branch.js';
+export {
+  ARCHETYPES,
+  SUGGESTION_CAVEAT,
+  archetypeById,
+  preview,
+  suggest,
+  type Archetype,
+  type Draft,
+  type DraftPreview,
+  type Suggestion,
+} from './branching/translate.js';
+export { scenarioPhaseSchema, type ScenarioPhase } from './scenario.js';

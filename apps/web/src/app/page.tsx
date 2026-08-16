@@ -4,6 +4,7 @@ import { FlowField } from '@/components/FlowField';
 
 const LINKS = [
   { href: '/what-if', label: 'What if — 180 scenarios' },
+  { href: '/what-if/build', label: 'Build your own' },
   { href: '/scenarios', label: 'Run a timeline' },
   { href: '/map', label: 'Map' },
   { href: '/diff', label: 'Compare runs' },

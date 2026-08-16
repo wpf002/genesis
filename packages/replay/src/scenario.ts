@@ -38,6 +38,34 @@ export const scenarioInterventionSchema = z.object({
 
 export type ScenarioIntervention = z.infer<typeof scenarioInterventionSchema>;
 
+/**
+ * A dated parameter change: the thing a fork adds.
+ *
+ * Additive to the format on purpose. A scenario with no phases canonicalises
+ * exactly as it did before, so every permalink and pack hash written before
+ * branching existed is still valid and still reproduces.
+ */
+export const scenarioPhaseSchema = z.object({
+  year: z.number().int(),
+  /** Empty means everywhere in the run. */
+  regions: z.array(z.string()).default([]),
+  overrides: z.record(z.string(), z.string().regex(DECIMAL)).default({}),
+  shocks: z
+    .array(
+      z.object({
+        key: z.string().min(1),
+        factor: z.string().regex(DECIMAL),
+      }),
+    )
+    .default([]),
+  /** Presentation only. Not hashed. */
+  label: z.string().default(''),
+  archetype: z.string().default('custom'),
+  reading: z.string().default(''),
+});
+
+export type ScenarioPhase = z.infer<typeof scenarioPhaseSchema>;
+
 export const scenarioSchema = z
   .object({
     format: z.literal(SCENARIO_FORMAT),
@@ -52,6 +80,7 @@ export const scenarioSchema = z
     regions: z.array(z.string()).default([]),
     overrides: z.record(z.string(), z.string().regex(DECIMAL)).default({}),
     interventions: z.array(scenarioInterventionSchema).default([]),
+    phases: z.array(scenarioPhaseSchema).default([]),
   })
   .superRefine((scenario, ctx) => {
     const seen = new Set<string>();
@@ -71,6 +100,27 @@ export const scenarioSchema = z
         });
       }
       seen.add(region);
+    }
+
+    const phaseYears = new Set<number>();
+    for (const phase of scenario.phases) {
+      if (phaseYears.has(phase.year)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['phases'],
+          message: `two phases diverge in ${phase.year}`,
+        });
+      }
+      phaseYears.add(phase.year);
+      for (const region of phase.regions) {
+        if (!REGIONS.includes(region)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['phases'],
+            message: `unknown region ${region}`,
+          });
+        }
+      }
     }
 
     const slots = new Set<string>();
@@ -155,6 +205,17 @@ export function canonicalConfig(scenario: Scenario): string {
       `intervention ${intervention.tick} ${intervention.stateKey}=${intervention.value}`,
     );
   }
+  // Emitted only when present. A scenario without phases canonicalises byte for
+  // byte as it did before branching existed, so every hash written then holds.
+  for (const phase of [...scenario.phases].sort((a, b) => a.year - b.year)) {
+    const regions = phase.regions.length === 0 ? '*' : [...phase.regions].sort().join(',');
+    for (const key of Object.keys(phase.overrides).sort()) {
+      lines.push(`phase ${phase.year} ${regions} override ${key}=${phase.overrides[key] as string}`);
+    }
+    for (const shock of [...phase.shocks].sort((a, b) => (a.key < b.key ? -1 : 1))) {
+      lines.push(`phase ${phase.year} ${regions} shock ${shock.key}*${shock.factor}`);
+    }
+  }
   return lines.join('\n') + '\n';
 }
 
@@ -201,12 +262,60 @@ export function runScenario(scenario: Scenario): ScenarioRun {
     throw error;
   }
 
-  const modules =
-    scenario.regions.length === 0
-      ? sandboxModules(params)
-      : worldModules(params, scenario.regions);
+  const build = (p: SandboxParams) =>
+    scenario.regions.length === 0 ? sandboxModules(p) : worldModules(p, scenario.regions);
 
-  const run = new Run({ seed: BigInt(scenario.seed), modules });
+  let run = new Run({ seed: BigInt(scenario.seed), modules: build(params) });
+
+  // Dated parameter changes. Each one runs the world as it stands to that year,
+  // snapshots, and continues with the merged parameter set on the same module
+  // ids and substreams — so state before a phase is byte-identical to the run
+  // without it, and anything after is attributable to that phase alone.
+  const merged: Record<string, string> = { ...scenario.overrides };
+  for (const phase of [...scenario.phases].sort((a, b) => a.year - b.year)) {
+    const at = phase.year + 3000;
+    if (at < 1 || at >= scenario.ticks) {
+      throw new ScenarioInvalid(`scenario: phase year ${phase.year} is outside the run`);
+    }
+    run.advanceTo(at);
+
+    Object.assign(merged, phase.overrides);
+    let phaseParams: SandboxParams;
+    try {
+      phaseParams = new SandboxParams(merged);
+    } catch (error) {
+      if (error instanceof OverrideRejected) throw new ScenarioInvalid(error.message);
+      throw error;
+    }
+    const next = new Run({ seed: BigInt(scenario.seed), modules: build(phaseParams) });
+    next.restore(run.snapshot());
+    run = next;
+
+    const landing =
+      phase.regions.length === 0
+        ? scenario.regions.length === 0
+          ? ['']
+          : scenario.regions
+        : phase.regions;
+    for (const region of landing) {
+      for (const shock of phase.shocks) {
+        const key = region === '' ? shock.key : `${region}:${shock.key}`;
+        let before: Fixed;
+        try {
+          before = run.get(key);
+        } catch {
+          throw new ScenarioInvalid(`scenario: no state key ${key} in this run`);
+        }
+        const after = Fx.mul(before, Fx.parse(shock.factor));
+        if (Fx.cmp(before, after) === 0) continue;
+        run.override(key, after, {
+          key: 'scenario.phase',
+          provenance: 'INVENTED',
+          contribution: Fx.sub(after, before),
+        });
+      }
+    }
+  }
 
   for (const intervention of orderedInterventions(scenario)) {
     run.advanceTo(intervention.tick);
@@ -236,7 +345,7 @@ export function runScenario(scenario: Scenario): ScenarioRun {
   return {
     scenario,
     configHash: configHash(scenario),
-    paramSetId: params.paramSetId(),
+    paramSetId: new SandboxParams(merged).paramSetId(),
     terminalHash: run.stateHash(),
     tick: run.tick,
     run,

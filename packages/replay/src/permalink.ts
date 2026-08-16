@@ -103,6 +103,21 @@ export function canonicalJson(scenario: Scenario): string {
         value: intervention.value,
         rationale: intervention.rationale,
       })),
+    phases: [...scenario.phases]
+      .sort((a, b) => a.year - b.year)
+      .map((phase) => ({
+        year: phase.year,
+        regions: [...phase.regions].sort(),
+        overrides: Object.fromEntries(
+          Object.keys(phase.overrides)
+            .sort()
+            .map((key) => [key, phase.overrides[key] as string]),
+        ),
+        shocks: [...phase.shocks].sort((a, b) => (a.key < b.key ? -1 : 1)),
+        label: phase.label,
+        archetype: phase.archetype,
+        reading: phase.reading,
+      })),
   });
 }
 

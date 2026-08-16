@@ -616,6 +616,7 @@ export default function RealityExplorer() {
                     regions: REGIONS,
                     overrides: entry.lever.overrides,
                     interventions: [],
+                    phases: [],
                   });
                   void navigator.clipboard?.writeText(token);
                 }}

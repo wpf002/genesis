@@ -61,7 +61,16 @@ export default function WhatIf() {
             it split.
           </p>
         </div>
-        <ModeBadge mode="SANDBOX" />
+        <div className="flex items-center gap-3">
+          <a
+            href="/what-if/build"
+            className="rounded border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors hover:bg-surface"
+            style={{ borderColor: '#3987e5', color: '#3987e5' }}
+          >
+            Build your own →
+          </a>
+          <ModeBadge mode="SANDBOX" />
+        </div>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
