@@ -266,3 +266,10 @@ export {
   type Person,
   type Possibility,
 } from './history/possibilities.js';
+
+export {
+  SIMULATION_HORIZON_YEAR,
+  beyondHorizon,
+  chronicleEntries,
+  type ChronicleEntry,
+} from './analysis/entries.js';

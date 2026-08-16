@@ -8,6 +8,8 @@ import {
   butterfly,
   cascades,
   chronicle,
+  chronicleEntries,
+  configHash,
   conditionFrames,
   convergence,
   entryById,
@@ -17,11 +19,13 @@ import {
   realityDistance,
   ripple,
   pressures,
+  parseScenario,
   runBaseline,
   runCounterfactual,
   spread,
   type Butterfly,
   type CascadeEvent,
+  type ChronicleEntry,
   type Convergence,
   type DistancePoint,
   type Expansion,
@@ -34,6 +38,55 @@ import {
   type SampleTable,
   type WorldEvent,
 } from '@genesis/replay';
+import { SandboxParams } from '@genesis/models';
+
+/** The scenario a catalogue entry corresponds to, for hashing its identity. */
+function scenarioOf(
+  entry: {
+    id: string;
+    title: string;
+    premise: string;
+    year: number;
+    regions: readonly string[];
+    lever: {
+      archetype: string;
+      reading: string;
+      overrides: Readonly<Record<string, string>>;
+      shocks: readonly { key: string; factor: number }[];
+    };
+  },
+  regions: readonly string[],
+  ticks: number,
+) {
+  // A dated phase, matching what runCounterfactual actually does. Hashing a
+  // globally-overridden scenario here would report an identity for a run nobody
+  // executed.
+  return parseScenario({
+    format: 'genesis-scenario/1',
+    id: entry.id.slice(0, 40),
+    title: entry.title,
+    note: entry.premise,
+    mode: 'SANDBOX',
+    seed: '1',
+    ticks,
+    regions: [...regions],
+    overrides: {},
+    phases: [
+      {
+        year: entry.year,
+        regions: entry.regions.filter((r) => regions.includes(r)),
+        overrides: entry.lever.overrides,
+        shocks: entry.lever.shocks.map((shock) => ({
+          key: shock.key,
+          factor: String(shock.factor),
+        })),
+        label: entry.title,
+        archetype: entry.lever.archetype,
+        reading: entry.lever.reading,
+      },
+    ],
+  });
+}
 
 export interface RealityRequest {
   readonly entryId: string;
@@ -46,6 +99,10 @@ export interface RealityResult {
   readonly frames: readonly Frame[];
   readonly baselineFrames: readonly Frame[];
   readonly events: readonly WorldEvent[];
+  readonly entries: readonly ChronicleEntry[];
+  /** Locked invariant #5's three inputs, per branch. */
+  readonly configHash: string;
+  readonly paramSetId: string;
   readonly expansion: Expansion;
   readonly distance: readonly DistancePoint[];
   readonly cascades: readonly CascadeEvent[];
@@ -155,6 +212,15 @@ self.onmessage = async (event: MessageEvent<RealityRequest>) => {
       frames: conditionFrames(counter.table),
       baselineFrames: conditionFrames(base.table),
       events: chronicle(counter.table),
+      entries: chronicleEntries(
+        chronicle(counter.table),
+        counter.table,
+        base.table,
+        chronicle(base.table),
+        counter.touched,
+      ),
+      configHash: configHash(scenarioOf(entry, regions, ticks)),
+      paramSetId: new SandboxParams(entry.lever.overrides).paramSetId(),
       expansion: expand(entry, counter.table, base.table, counter.touched),
       distance,
       cascades: cascades(distance),

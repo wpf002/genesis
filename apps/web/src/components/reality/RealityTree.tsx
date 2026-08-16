@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { formatYear, type CascadeEvent } from '@genesis/replay';
 
 // The reality tree.
@@ -51,6 +52,15 @@ export function RealityTree({
   onSeek,
   title,
 }: TreeProps) {
+  // Zoom and pan over the drawn surface. The projection below already expands
+  // the divergence; this is for reading a crowded stretch of branch, so it
+  // scales the viewBox rather than the data.
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState(0);
+  const viewW = W / zoom;
+  const maxPan = Math.max(0, W - viewW);
+  const offset = Math.max(0, Math.min(maxPan, pan));
+
   const x = projector(firstTick, divergenceTick, lastTick);
   const splitX = x(divergenceTick);
   const trunkY = H / 2;
@@ -68,13 +78,17 @@ export function RealityTree({
   return (
     <figure className="w-full">
       <svg
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`${offset} 0 ${viewW} ${H}`}
         className="w-full cursor-crosshair"
         role="img"
         aria-label={`Reality tree for ${title}`}
+        onWheel={(event) => {
+          if (!event.ctrlKey && !event.metaKey && Math.abs(event.deltaY) < 2) return;
+          setZoom((z) => Math.max(1, Math.min(8, z * (event.deltaY < 0 ? 1.15 : 0.87))));
+        }}
         onClick={(event) => {
           const box = event.currentTarget.getBoundingClientRect();
-          const px = ((event.clientX - box.left) / box.width) * W;
+          const px = offset + ((event.clientX - box.left) / box.width) * viewW;
           // Invert the two-segment projection.
           const mid = PAD + (W - PAD * 2) * 0.34;
           const tick =
@@ -180,9 +194,49 @@ export function RealityTree({
           {formatYear(lastTick - 3000)}
         </text>
       </svg>
-      <figcaption className="mt-1 font-mono text-[10px] text-ink-muted">
-        Time is scaled around the divergence, not linear. Branch height is Reality
-        Distance. Amber dots are model-detected cascades.
+      <figcaption className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-ink-muted">
+        <span>
+          Time is scaled around the divergence, not linear. Branch height is Reality
+          Distance. Amber dots are model-detected cascades.
+        </span>
+        <span className="flex items-center gap-1">
+          zoom
+          <button
+            onClick={() => setZoom((z) => Math.min(8, z * 1.5))}
+            className="rounded border border-rule px-1.5 hover:text-ink"
+          >
+            +
+          </button>
+          <button
+            onClick={() => setZoom((z) => Math.max(1, z / 1.5))}
+            className="rounded border border-rule px-1.5 hover:text-ink"
+          >
+            −
+          </button>
+          <span className="tabular-nums">{zoom.toFixed(1)}×</span>
+          {zoom > 1 && (
+            <>
+              <input
+                type="range"
+                min={0}
+                max={Math.round(maxPan)}
+                value={Math.round(offset)}
+                aria-label="pan"
+                onChange={(e) => setPan(Number(e.target.value))}
+                className="h-1 w-24 accent-[var(--series-1)]"
+              />
+              <button
+                onClick={() => {
+                  setZoom(1);
+                  setPan(0);
+                }}
+                className="rounded border border-rule px-1.5 hover:text-ink"
+              >
+                reset
+              </button>
+            </>
+          )}
+        </span>
       </figcaption>
     </figure>
   );

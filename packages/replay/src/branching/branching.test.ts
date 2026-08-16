@@ -17,6 +17,7 @@ import {
   realityDistance,
   reproduce,
   runBranch,
+  runCounterfactual,
   runScenario,
   suggest,
   type Branch,
@@ -290,6 +291,56 @@ describe('a fork is comparable to its parent', () => {
     expect(run.phaseTicks).toEqual([entry!.year + 3000]);
     expect(run.touched.length).toBeGreaterThan(0);
   });
+});
+
+describe('the permalink reproduces the run the explorer showed', () => {
+  // Caught by clicking the Verify button: the explorer handed out a permalink
+  // whose overrides applied from 3000 BC, while the run on screen applied them
+  // at the divergence year. Different universes, same link.
+  const REGION_SET = ['ITA', 'FRA', 'DEU', 'EGY'];
+  const SPAN = 4600;
+
+  it.each(['the-black-death-never-occurs', 'rome-eternal'])(
+    'matches for %s',
+    (id) => {
+      const entry = entryById(id);
+      if (entry === undefined) throw new Error(`no entry ${id}`);
+
+      const shown = runCounterfactual({
+        entry,
+        regions: REGION_SET,
+        ticks: SPAN,
+        every: 12,
+      });
+
+      const shared = runScenario(
+        parseScenario({
+          format: 'genesis-scenario/1',
+          id: entry.id.slice(0, 40),
+          title: entry.title,
+          note: entry.premise,
+          mode: 'SANDBOX',
+          seed: '1',
+          ticks: SPAN,
+          regions: REGION_SET,
+          overrides: {},
+          phases: [
+            {
+              year: entry.year,
+              regions: entry.regions.filter((r) => REGION_SET.includes(r)),
+              overrides: entry.lever.overrides,
+              shocks: entry.lever.shocks.map((shock) => ({
+                key: shock.key,
+                factor: String(shock.factor),
+              })),
+            },
+          ],
+        }),
+      );
+
+      expect(shared.terminalHash).toBe(shown.terminalHash);
+    },
+  );
 });
 
 describe('runScenario and runBranch agree', () => {

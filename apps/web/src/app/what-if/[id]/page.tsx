@@ -8,8 +8,10 @@ import {
   entryById,
   eventsNear,
   EVIDENCE,
+  beyondHorizon,
   formatYear,
   NOT_A_PROBABILITY,
+  verifyPermalink,
   REPRESENTABILITY,
   SUPPORT,
   continuity,
@@ -108,7 +110,45 @@ export default function RealityExplorer() {
   const [selected, setSelected] = useState<string | undefined>();
   const [diffField, setDiffField] = useState<DiffField>('population');
   const [node, setNode] = useState<TimelineNode | undefined>();
+  const [verified, setVerified] = useState<boolean | undefined>();
   const worker = useRef<Worker>();
+
+  // The scenario this entry corresponds to. Built once so the permalink, the
+  // verify button and the copy button cannot disagree about what was run.
+  //
+  // The lever is a PHASE at the divergence year, not a global override. Applying
+  // it from 3000 BC would be a different universe rather than a counterfactual,
+  // and the permalink would hand out a run that is not the one on screen — which
+  // is exactly what it did until the Verify button caught it.
+  const permalinkFor = (target: CatalogueEntry) =>
+    encodePermalink({
+      format: 'genesis-scenario/1',
+      id: target.id.slice(0, 40),
+      title: target.title,
+      note: target.premise,
+      mode: 'SANDBOX',
+      seed: '1',
+      ticks: TICKS,
+      regions: REGIONS,
+      overrides: {},
+      interventions: [],
+      phases: [
+        {
+          year: target.year,
+          // Only countries this run actually simulates, or the phase would
+          // reference state keys that do not exist here.
+          regions: target.regions.filter((r) => REGIONS.includes(r)),
+          overrides: target.lever.overrides,
+          shocks: target.lever.shocks.map((shock) => ({
+            key: shock.key,
+            factor: String(shock.factor),
+          })),
+          label: target.title,
+          archetype: target.lever.archetype,
+          reading: target.lever.reading,
+        },
+      ],
+    });
 
   const start = useCallback((target: CatalogueEntry) => {
     worker.current?.terminate();
@@ -181,7 +221,7 @@ export default function RealityExplorer() {
 
   const chronicleSoFar = useMemo(() => {
     if (loaded === undefined || frame === undefined) return [];
-    return loaded.events.filter((e) => e.tick <= frame.tick).slice(-14).reverse();
+    return loaded.entries.filter((e) => e.event.tick <= frame.tick).slice(-14).reverse();
   }, [loaded, frame]);
 
   const analogues = useMemo(() => {
@@ -335,6 +375,20 @@ export default function RealityExplorer() {
                   First difference
                 </button>
               )}
+              {loaded.firstDifference !== undefined && (
+                <button
+                  onClick={() => {
+                    // Follow it: seek to where the split starts, switch to the
+                    // causal view and open the node that begins the chain.
+                    seekToTick(loaded.firstDifference!.tick);
+                    setNode({ kind: 'first-difference', difference: loaded.firstDifference! });
+                    setMode('cause');
+                  }}
+                  className="rounded border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-secondary transition-colors hover:bg-surface"
+                >
+                  Follow the divergence →
+                </button>
+              )}
               {loaded.cascades.slice(0, 4).map((cascade) => (
                 <button
                   key={cascade.tick}
@@ -450,6 +504,15 @@ export default function RealityExplorer() {
               {formatYear(year)}
             </span>
           </div>
+
+          {beyondHorizon(year) !== null && (
+            <p
+              className="mt-2 rounded border-l-2 bg-surface p-3 text-xs text-ink"
+              style={{ borderColor: '#c98500' }}
+            >
+              {beyondHorizon(year)}
+            </p>
+          )}
 
           <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.1em]">
             {!diverged ? (
@@ -735,21 +798,50 @@ export default function RealityExplorer() {
                 {chronicleSoFar.length === 0 && (
                   <li className="py-2 font-mono text-xs text-ink-muted">Nothing yet.</li>
                 )}
-                {chronicleSoFar.map((event) => (
+                {chronicleSoFar.map((entryRow) => (
                   <li
-                    key={`${event.tick}-${event.region}-${event.headline}`}
-                    className="flex flex-wrap items-baseline gap-x-4 border-b border-rule py-2"
+                    key={`${entryRow.event.tick}-${entryRow.event.region}-${entryRow.event.headline}`}
+                    className="border-b border-rule py-2"
                   >
-                    <span className="w-20 font-mono text-xs tabular-nums text-ink-muted">
-                      {formatYear(event.year)}
-                    </span>
-                    <span className="w-32 truncate text-xs text-ink-secondary">
-                      {countryName(event.region)}
-                    </span>
-                    <span className="text-sm" style={{ color: SEVERITY[event.severity] }}>
-                      {event.headline}
-                    </span>
-                    <EvidenceTag kind={loaded.touched.includes(event.region) ? 'simulated' : 'knock-on'} />
+                    <div className="flex flex-wrap items-baseline gap-x-4">
+                      <span className="w-20 font-mono text-xs tabular-nums text-ink-muted">
+                        {formatYear(entryRow.event.year)}
+                      </span>
+                      <span className="w-32 truncate text-xs text-ink-secondary">
+                        {countryName(entryRow.event.region)}
+                      </span>
+                      <span className="text-sm" style={{ color: SEVERITY[entryRow.event.severity] }}>
+                        {entryRow.event.headline}
+                      </span>
+                      <span className="ml-auto flex items-baseline gap-3">
+                        <WhyLink
+                          stateKey={entryRow.stateKey}
+                          region={entryRow.event.region}
+                          year={entryRow.event.year}
+                        />
+                        <EvidenceTag kind={entryRow.evidence} />
+                      </span>
+                    </div>
+                    <p className="mt-0.5 flex flex-wrap gap-x-4 pl-24 font-mono text-[10px] text-ink-muted">
+                      {entryRow.label !== null && <span>{entryRow.label}</span>}
+                      {entryRow.counterfactual !== null && (
+                        <span>this world {entryRow.counterfactual.toPrecision(4)}</span>
+                      )}
+                      {entryRow.baseline !== null && (
+                        <span>baseline {entryRow.baseline.toPrecision(4)}</span>
+                      )}
+                      {entryRow.delta !== null && (
+                        <span style={{ color: entryRow.delta >= 0 ? '#199e70' : '#d55181' }}>
+                          {entryRow.delta >= 0 ? '+' : ''}
+                          {entryRow.delta.toPrecision(3)}
+                        </span>
+                      )}
+                      <span>
+                        {entryRow.alsoInBaseline
+                          ? 'happens in the baseline too'
+                          : 'does not happen in the baseline'}
+                      </span>
+                    </p>
                   </li>
                 ))}
               </ol>
@@ -792,9 +884,11 @@ export default function RealityExplorer() {
               <dl className="mt-2">
                 {[
                   ['Seed', '1'],
+                  ['Config hash', loaded.configHash],
+                  ['Parameter set', loaded.paramSetId],
+                  ['Baseline hash', loaded.baselineHash],
+                  ['Terminal state hash', loaded.terminalHash],
                   ['Countries', String(REGIONS.length)],
-                  ['Baseline hash', loaded.baselineHash.slice(0, 24)],
-                  ['Counterfactual hash', loaded.terminalHash.slice(0, 24)],
                 ].map(([label, value]) => (
                   <div key={label} className="border-t border-rule py-1.5">
                     <dt className="text-[10px] text-ink-muted">{label}</dt>
@@ -802,22 +896,31 @@ export default function RealityExplorer() {
                   </div>
                 ))}
               </dl>
+
+              <p
+                className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em]"
+                style={{ color: verified === false ? '#d55181' : '#199e70' }}
+              >
+                {verified === undefined
+                  ? 'Reproducible — verify to confirm on this machine'
+                  : verified
+                    ? 'Verified — reproduced exactly here'
+                    : 'Failed verification'}
+              </p>
               <button
                 onClick={() => {
-                  const token = encodePermalink({
-                    format: 'genesis-scenario/1',
-                    id: entry.id.slice(0, 40),
-                    title: entry.title,
-                    note: entry.premise,
-                    mode: 'SANDBOX',
-                    seed: '1',
-                    ticks: TICKS,
-                    regions: REGIONS,
-                    overrides: entry.lever.overrides,
-                    interventions: [],
-                    phases: [],
-                  });
-                  void navigator.clipboard?.writeText(token);
+                  setVerified(
+                    verifyPermalink(permalinkFor(entry), loaded.terminalHash).reproduced,
+                  );
+                }}
+                className="mt-3 w-full rounded border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors hover:bg-surface"
+                style={{ borderColor: '#199e70', color: '#199e70' }}
+              >
+                Verify run
+              </button>
+              <button
+                onClick={() => {
+                  void navigator.clipboard?.writeText(permalinkFor(entry));
                 }}
                 className="mt-3 w-full rounded border border-rule px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-secondary hover:bg-surface hover:text-ink"
               >
