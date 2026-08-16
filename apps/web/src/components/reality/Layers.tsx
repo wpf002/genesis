@@ -67,7 +67,13 @@ const STAGE_LABEL: Record<ButterflyNode['stage'], string> = {
 };
 
 /** The causal cascade, as a chain you can walk. */
-export function ButterflyEffect({ data }: { data: Butterfly }) {
+export function ButterflyEffect({
+  data,
+  onOpen,
+}: {
+  data: Butterfly;
+  onOpen?: (node: ButterflyNode) => void;
+}) {
   const [open, setOpen] = useState<string | undefined>();
   const byStage = useMemo(() => {
     const order: ButterflyNode['stage'][] = [
@@ -142,6 +148,14 @@ export function ButterflyEffect({ data }: { data: Butterfly }) {
                       <p className="mt-1 flex flex-wrap items-baseline gap-3 font-mono text-[10px] text-ink-muted">
                         {node.stateKey !== null && <span>{node.stateKey}</span>}
                         <WhyLink stateKey={node.stateKey} region={node.region} year={node.year} />
+                        {onOpen !== undefined && (
+                          <button
+                            onClick={() => onOpen(node)}
+                            className="underline decoration-rule underline-offset-2 hover:text-ink"
+                          >
+                            open node
+                          </button>
+                        )}
                         {node.parents.length > 0 && (
                           <span>follows from {node.parents.join(', ')}</span>
                         )}

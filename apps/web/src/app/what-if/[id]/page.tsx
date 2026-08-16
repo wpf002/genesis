@@ -39,6 +39,7 @@ import {
   WhyLink,
 } from '@/components/reality/Layers';
 import { DiffMap, type DiffField } from '@/components/reality/DiffMap';
+import { NodeDetail, TimeScrubber, type TimelineNode } from '@/components/reality/Timeline';
 import { ModeBadge } from '@/components/ModeBadge';
 
 // The Reality Explorer.
@@ -106,6 +107,7 @@ export default function RealityExplorer() {
   const [step, setStep] = useState<number>(5);
   const [selected, setSelected] = useState<string | undefined>();
   const [diffField, setDiffField] = useState<DiffField>('population');
+  const [node, setNode] = useState<TimelineNode | undefined>();
   const worker = useRef<Worker>();
 
   const start = useCallback((target: CatalogueEntry) => {
@@ -304,6 +306,69 @@ export default function RealityExplorer() {
               onSeek={seekToTick}
               title={entry.title}
             />
+            <div className="mt-1">
+              <TimeScrubber
+                firstTick={loaded.frames[0]?.tick ?? 1}
+                lastTick={loaded.frames[frameCount - 1]?.tick ?? TICKS}
+                currentTick={frame.tick}
+                divergenceTick={loaded.divergenceTick}
+                cascades={loaded.cascades}
+                onSeek={seekToTick}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => setNode({ kind: 'divergence', year: entry.year })}
+                className="rounded border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors hover:bg-surface"
+                style={{ borderColor: '#d55181', color: '#d55181' }}
+              >
+                Divergence node
+              </button>
+              {loaded.firstDifference !== undefined && (
+                <button
+                  onClick={() =>
+                    setNode({ kind: 'first-difference', difference: loaded.firstDifference! })
+                  }
+                  className="rounded border border-rule px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-secondary transition-colors hover:bg-surface"
+                >
+                  First difference
+                </button>
+              )}
+              {loaded.cascades.slice(0, 4).map((cascade) => (
+                <button
+                  key={cascade.tick}
+                  onClick={() => {
+                    setNode({ kind: 'cascade', event: cascade });
+                    seekToTick(cascade.tick);
+                  }}
+                  className="rounded border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors hover:bg-surface"
+                  style={{ borderColor: '#c98500', color: '#c98500' }}
+                >
+                  Cascade {formatYear(cascade.year)}
+                </button>
+              ))}
+            </div>
+
+            {node !== undefined && (
+              <div className="mt-4 max-w-md">
+                <NodeDetail
+                  node={node}
+                  context={{
+                    scenarioTitle: entry.title,
+                    premise: entry.premise,
+                    reading: entry.lever.reading,
+                    archetype: entry.lever.archetype,
+                    changedParams: loaded.changedParams,
+                    touched: loaded.touched,
+                    baselineHash: loaded.baselineHash,
+                    terminalHash: loaded.terminalHash,
+                    limits: loaded.expansion.speculative.slice(0, 4),
+                  }}
+                  onClose={() => setNode(undefined)}
+                />
+              </div>
+            )}
           </section>
 
           {/* Transport */}
@@ -572,7 +637,10 @@ export default function RealityExplorer() {
           {mode === 'cause' && (
             <>
               <section className="mt-10 grid gap-10 lg:grid-cols-2">
-                <ButterflyEffect data={loaded.butterfly} />
+                <ButterflyEffect
+                  data={loaded.butterfly}
+                  onOpen={(n) => setNode({ kind: 'effect', node: n })}
+                />
                 <HistoricalPressures
                   data={loaded.pressureSeries[at - (at % 8)] ?? []}
                   where={`world mean · ${formatYear(year)}`}
